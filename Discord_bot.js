@@ -49,9 +49,7 @@ client.on('message', async msg => {
                 var batchID = splitMsgContents[2];                // roleId to assign
                 var studentIdList = allStudentId.split(",");
                 const roleToAssign = msg.guild.roles.cache.find(role=>role.id == batchID);
-                //console.log(splitMsgContents);
-                //console.log(studentIdList.length);
-                for(var i = 0 ;i<=studentIdList.length;i++){
+                for(var i = 0 ;i<studentIdList.length;i++){
                     var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]); //find from discord id which member of discord 
                     studentmember.roles.add(roleToAssign);
                     msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
