@@ -51,18 +51,11 @@ client.on('message', async msg => {
                 const roleToAssign = msg.guild.roles.cache.find(role=>role.id == batchID);
                 //console.log(splitMsgContents);
                 //console.log(studentIdList.length);
-                for(var i = 0 ;i<studentIdList.length;i++){
+                for(var i = 0 ;i<=studentIdList.length;i++){
                     var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]); //find from discord id which member of discord 
                     studentmember.roles.add(roleToAssign);
                     msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
                 }               
-                // old code             
-                //const studentmember = msg.guild.members.cache.find(member=>member.id == studentId);
-                //console.log(studentmember.nickname);             
-                //studentmember.roles.add(roleToAssign);    
-                //msg.member.roles.add(roleToAssign);           
-                //var reply = await Command.GiveRole(msg,splitMsgContents[1],splitMsgContents[2]);
-                //msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name);
             }
         }
         else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {           
