@@ -50,9 +50,20 @@ client.on('message', async msg => {
                 var studentIdList = allStudentId.split(",");
                 const roleToAssign = msg.guild.roles.cache.find(role=>role.id == batchID);
                 for(var i = 0 ;i<studentIdList.length;i++){
-                    var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]); //find from discord id which member of discord 
-                    studentmember.roles.add(roleToAssign);
-                    msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
+		            //find from discord id which member of discord 
+                    //var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]); 
+                    msg.guild.members.fetch(studentIdList[i])
+			        .then(studentmember => {  
+                    		studentmember.roles.add(roleToAssign);
+                    		msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
+			        })
+			        .catch(err => msg.reply("student with id: "+ studentIdList[i] +" not found - "+ err));
+                    /*if(studentmember === undefined) {
+                                msg.reply("student with id: "+ studentIdList[i] +" not found"); 
+                    } else {
+                                studentmember.roles.add(roleToAssign);
+                                msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
+                    }*/
                 }               
             }
         }
