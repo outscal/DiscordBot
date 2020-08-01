@@ -1,11 +1,14 @@
 const Discord = require('discord.js');
-// const DatabaseSystem = require('./DatabaseSystem/SaveSystem');
+const Firebase = require('./Firebase/firebase');
 const Command = require('./Response/BotCammands.js');
+// const DatabaseSystem = require('./DatabaseSystem/SaveSystem');
 
 const dotenv = require('dotenv');
+const { setupFirebase } = require('./Firebase/firebase');
 dotenv.config();
 
 const client = new Discord.Client();
+const database = setupFirebase();
 
 //DatabaseSystem.SetupSQLDatabase();
 //var generalChannel;
