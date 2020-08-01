@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 // const DatabaseSystem = require('./DatabaseSystem/SaveSystem');
 const Command = require('./Response/BotCammands.js');
+const fs = require('fs');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -98,6 +99,76 @@ client.on('message', async msg => {
             msg.reply("Your Discord Id is : " + msg.author);    
             //SendMessageToChannel(reply, msg.channel.id);       
         }
+        else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot"){
+            if(msg.member.roles.cache.some(role => role.name === 'team')) {
+                var splitMsgContents = msg.content.split(" ");    // !configstandup roleid time1,time2,time3 time format 00:00 24hr format    
+                var resroleid = splitMsgContents[1];
+                var timeList = splitMsgContents[2];
+                var timesplit = timeList.split(",");
+                var objTable = {
+                    table: []
+                 };
+                var configFileString = null;
+                try {
+                    configFileString = fs.readFileSync("./JsonFiles/standupConfig.json");
+                  } catch (err) {
+                    // write file if no file exists
+                    const jsonRoleData = {
+                        roleId: resroleid,
+                        time1: timesplit[0],
+                        time2: timesplit[1],
+                        leaderboardtime : timesplit[2]
+                    };
+                    objTable.table.push(jsonRoleData);
+                    const jsonstr = JSON.stringify(objTable.table);
+                    console.log(jsonstr);
+                    fs.writeFile('./JsonFiles/standupConfig.json', jsonstr, err => {
+                        if (err) {
+                            console.log('Error writing file', err);
+                        } else {
+                            console.log('Successfully appended file');
+                        }
+                    })
+                    console.log(err);
+                    return;
+                  }
+                //var jsonfile = fs.readFile("./startupConfig.json");
+                var configFile = JSON.parse(configFileString);
+                objTable.table.push(configFile);
+                var Tablelength = objTable.table.length;
+                /*for(i = 0;i<Tablelength; i++)
+                {                   
+                    if(objTable.table[i].roleId == resroleid){
+                        //delete objTable.table[i];
+                        objTable.table.push({roleId: resroleid,time1: timesplit[0],time2: timesplit[1],leaderboardtime:timesplit[2]});
+                    }                   
+                }*/
+                console.log(objTable.table);
+                const jsonRoleData = {
+                    roleId: resroleid,
+                    time1: timesplit[0],
+                    time2: timesplit[1],
+                    leaderboardtime : timesplit[2]
+                };
+                objTable.table.push(jsonRoleData);
+                const jsonstr = JSON.stringify(objTable.table);
+                console.log(jsonstr);
+                fs.writeFile('./JsonFiles/standupConfig.json', jsonstr, err => {
+                    if (err) {
+                        console.log('Error writing file', err);
+                    } else {
+                        console.log('Successfully appended file');
+                    }
+                })
+                   
+
+                //if(channelReason == null){
+                    //channelReason = "Outscal Server for education";
+                //}
+                //msg.guild.channels.create(channelName, { reason: channelReason });
+                console.log("Command works "+resroleid+" "+timesplit);
+            }
+        }
         // else if (msg.content.includes("thank")) {
         //     //console.log(msg.mentions.users.array()[0]);
         //     for (var i = 0; i < msg.mentions.users.size; i++) {
@@ -158,4 +229,8 @@ function ListOfChannels(guild) {
 
 function SendMessageToChannel(message,channelID) {
     client.channels.cache.get(channelID).send(message);
+}
+
+function CreateJsonFile(){
+
 }
