@@ -5,7 +5,7 @@ var schedule = require('node-schedule');
 
 const client = new Discord.Client();
 
-const token = 'NzM2OTY4MDY5NjQ5NTMwOTIz.Xx2hAA.KSf_zfFVbQLVNSMK8Te2YCulnkY';
+const token = '';
 
 const channelIDs = ["737605954543026186","737345446078316606"]   // enter channelID for standUp - you can get channel id by the command !channelID
 
@@ -20,11 +20,11 @@ function startStandUp(channelID){
     
     const stantUpStartMessage = new MessageEmbed()
       // Set the title of the field
-      .setTitle(`Daily standup for the channel  "${channelName}" with channel ID : ${channelID}`)
+      .setTitle(`Reminder for Daily Standup`)
       // Set the color of the embed
       .setColor(0x16a085)
       // Set the main content of the embed
-      .setDescription("start by command '!standUp' and mention the channel ID when asked" );
+      .setDescription("start by command 'start'" );
 
        users.forEach(users=>{
         
@@ -86,24 +86,18 @@ client.on('message',async (message)=>{
 
   
 
-    if (msg.startsWith('!standup')) {
+    if (msg.startsWith('start')) {
         let answers={
             did :"",
             plan :"",
-            problem :"",
-            channelID:""
+            problem :""
         }
-        message.channel.send("Enter the channel ID");
+        message.channel.send("what you did today");
        
         const filter = m => !m.author.bot;
         // Errors: ['time'] treats ending because of the time limit as an error
+       
         message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ['time'] })
-        .then(collected =>{
-            console.log(collected.size);
-            answers.channelID = collected.first().content
-            message.channel.send("what you did today ? ");
-        } ).then(collected=>{
-            message.channel.awaitMessages(filter, { max: 1, time: 60000, errors: ['time'] })
             .then(collected =>{
                 answers.did = collected.first().content
                 message.channel.send("What are you planning on doing tomorrow ?");  
@@ -121,30 +115,31 @@ client.on('message',async (message)=>{
                     message.channel.send("All done! Congrats for maintaining a streak for X days!");
 
                     //message embed
-                    if(answers.channelID){
-                        let destinationChannel = client.channels.cache.get(answers.channelID);
-                        const updateEmbed = new Discord.MessageEmbed()
-                                .setColor('#0099ff')
-                                .setTitle(`${message.author.username} progress updates`)
-                                
-                                .addFields(
-                                    { name: 'What did you do today?', value: answers.did },
-                                    { name: 'What are you planning on doing tomorrow?', value: answers.plan },
-                                    { name: 'Where do you need help?', value: answers.problem },
-                                    
-                                )
-                                
-                                .setTimestamp()
-                                destinationChannel.send(updateEmbed);
+                    const myGuild = client.guilds.cache.get('736892439868080130');
+                    const user = myGuild.members.cache.get(message.author.id);
+                    const ChannelName = user.roles.cache.first().name;
+                    const destinationChannel = myGuild.channels.cache.find(channel => channel.name == channelName);
 
-                    }
+                    const updateEmbed = new Discord.MessageEmbed()
+                            .setColor('#0099ff')
+                            .setTitle(`${message.author.username} progress updates`)
+                            
+                            .addFields(
+                                { name: 'What did you do today?', value: answers.did },
+                                { name: 'What are you planning on doing tomorrow?', value: answers.plan },
+                                { name: 'Where do you need help?', value: answers.problem },
+                                
+                            )
+                            
+                            .setTimestamp()
+                            destinationChannel.send(updateEmbed);
 
                     console.log(answers);
-                }).catch(collected => message.channel.send(`timeout start again with command "!standup" `))
-            }).catch(collected => message.channel.send(`timeout start again with command "!standup" `))
+                }).catch(collected => message.channel.send(`timeout start again with command "start"`))
+            }).catch(collected => message.channel.send(`timeout start again with command "start" `))
              
-        }).catch(collected => message.channel.send(`timeout start again with command "!standup" `))
-        }).catch(collected => message.channel.send(`timeout start again with command "!standup" `));
+        }).catch(collected => message.channel.send(`timeout start again with command "start"`))
+        
         
 
       }
@@ -153,5 +148,9 @@ client.on('message',async (message)=>{
 })
 
 
-
 client.login(token);
+
+
+
+
+
