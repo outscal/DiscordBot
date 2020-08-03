@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 // const DatabaseSystem = require('./DatabaseSystem/SaveSystem');
 const Command = require('./Response/BotCammands.js');
-
+const standup = require('./StandUp/StandUp_bot');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -11,12 +11,15 @@ const client = new Discord.Client();
 //var generalChannel;
 
 client.login(process.env.DISCORD_APP_TOKEN); 
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
+    standup.StandUpscheduler('15','20',['students'],client);
     //generalChannel = client.channels.get(process.env.GENERAL_CHANNEL_ID);
 });
 
 client.on('message', async msg => {
+    standup.standUpCommands(msg,client);   //  for standup
     if (msg.author.username != "Bot_helper") {
         // if (msg.type == "GUILD_MEMBER_JOIN") {
         //     console.log("User Joined" + msg.author.username + " " + msg.author.id);
@@ -159,3 +162,13 @@ function ListOfChannels(guild) {
 function SendMessageToChannel(message,channelID) {
     client.channels.cache.get(channelID).send(message);
 }
+
+
+// standup configs below
+
+
+
+
+
+// standup configs above
+
