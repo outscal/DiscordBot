@@ -1,10 +1,12 @@
 const Discord = require('discord.js');
 const Firebase = require('./Firebase/firebase');
 const Command = require('./Response/BotCammands.js');
+//const standupConfigClass = require('./StandupConfigData.js');
 // const DatabaseSystem = require('./DatabaseSystem/SaveSystem');
 
 const dotenv = require('dotenv');
 const { setupFirebase } = require('./Firebase/firebase');
+const StandupConfigData = require('./StandupConfigData');
 dotenv.config();
 
 const client = new Discord.Client();
@@ -84,6 +86,44 @@ client.on('message', async msg => {
                 }
                 msg.guild.roles.create({data:{name:roleName,permissions:rolePermissions}});
             }
+        }
+        else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {           
+            if(msg.member.roles.cache.some(role => role.name === 'team')) {
+                var splitMsgContents = msg.content.split(" ");    // !configstandup roleid channelid time1,time2,time3 time format 00:00 24hr format    
+                var resroleid = splitMsgContents[1];
+                var reschannelid = splitMsgContents[2];
+                var timeList = splitMsgContents[3];
+                var timesplit = timeList.split(",");
+                //var rolenamebyid = "hello";
+                //const resrolename = msg.guild.roles.fetch(resroleid,true).then(res =>{rolenamebyid = res.name;});
+                const roledatabyid = msg.guild.roles.cache.find(role=>role.id == resroleid);
+                standupData = new StandupConfigData(resroleid,reschannelid,timesplit[0],timesplit[1],timesplit[2]);
+                var rolename = roledatabyid.name;
+                if(rolename != null){
+                    // database is firebase here and its child has same name as rolename
+                    if(database.child(rolename) == rolename){
+                        var dbchild = database.child(rolename); 
+                        dbchild.update({
+                            standupData
+                        });
+                    }
+                    else{
+                        var dbchild = database.child(rolename); 
+                        dbchild.set(standupData);
+                    }
+                }else{
+                    if(database.child(resroleid) == resroleid){
+                        var dbchild = database.child(resroleid); 
+                        dbchild.update({
+                            standupData
+                        });
+                    }
+                    else{
+                        var dbchild = database.child(resroleid); 
+                        dbchild.set(standupData);
+                    }
+                }               
+            }      
         }
         else if (msg.content.startsWith("!createchannel") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) {
