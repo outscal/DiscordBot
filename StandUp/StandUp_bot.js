@@ -1,9 +1,10 @@
 const Discord = require("discord.js");
 const { MessageEmbed } = require("discord.js");
 var schedule = require("node-schedule");
+const { database } = require("firebase-admin");
 
 function StandUpscheduler(channelName,hour,min,client) {
-  console.log(`scheduled for channel: ${channelName} at ${hour}:${min}` )
+  //console.log(`scheduled for channel: ${channelName} at ${hour}:${min}` )
   schedule.scheduleJob(`${min} ${hour} * * *`, function () {
     // set time for standup more on https://www.npmjs.com/package/node-schedule
     startStandUp(channelName, client);
@@ -12,7 +13,8 @@ function StandUpscheduler(channelName,hour,min,client) {
   
 }
 
-function getDataAndSchdule(database, client) {
+function getDataAndSchdule(db, client) {
+   var database = db.ref("/StandupConfig");
   database.on("value", function (snapShot) {
     snapShot.forEach((channel) => {
       if (channel.val().IsON) {
@@ -58,10 +60,13 @@ function startStandUp(channelName, client) {
   });
 }
 
-function standUpCommands(message, client) {
+function standUpCommands(message, client,db) {
+    var dialyStandUpDB = db.ref("/daily_standups");
   const msg = message.content.toLowerCase();
   if (msg == "!channelid") {
     message.reply(message.channel.id);
+    console.log(dialyStandUpDB.key);
+   // saveToDataBase(dialyStandUpDB);
   }
 
   if (msg.startsWith("start")) {
@@ -69,6 +74,8 @@ function standUpCommands(message, client) {
       did: "",
       plan: "",
       problem: "",
+      channelId:"",
+      studentId:"",
     };
     message.channel.send("what you did today");
 
@@ -98,13 +105,15 @@ function standUpCommands(message, client) {
                 );
 
                 //message embed
+                
                 const myGuild = client.guilds.cache.get("736892439868080130");
                 const user = myGuild.members.cache.get(message.author.id);
                 const channelName = user.roles.cache.first().name;
                 const destinationChannel = myGuild.channels.cache.find(
                   (channel) => channel.name == channelName
                 );
-
+                const channelID = destinationChannel.id;
+                const studentID = message.author;
                 const updateEmbed = new Discord.MessageEmbed()
                   .setColor("#0099ff")
                   .setTitle(`${message.author.username} progress updates`)
@@ -120,6 +129,9 @@ function standUpCommands(message, client) {
 
                   .setTimestamp();
                 destinationChannel.send(updateEmbed);
+                
+                saveToDataBase(dialyStandUpDB,channelID,studentID,answers);
+                
 
                 //console.log(answers);
               })
@@ -135,6 +147,59 @@ function standUpCommands(message, client) {
         message.channel.send(`timeout start again with command "start"`)
       );
   }
+}
+
+function saveToDataBase(dialyStandUpDB,channelID,student,answers){
+    //console.log(channelID,student.id,answers);
+    var date = get_Date();
+    //console.log();
+    //console.log(dialyStandUpDB.child(date).key)
+    //dialyStandUpDB.child(date).set(date);
+    if(dialyStandUpDB.child(date).key == date){
+        console.log(true);
+        var doc=dialyStandUpDB.child(date);
+            console.log(doc.child(channelID));
+        if(doc.child(channelID).key == channelID){
+           channel = doc.child(channelID);
+           console.log(channel.child(student.id));
+           if(channel.child(student.id).key == student.id){
+                student.send("standup already done")
+           }
+           else{
+            channel.child(student.id).set(student.id);
+            student = channel.child(student.id)
+            student.set(answers);
+           }
+        }
+        else{
+            doc.child(channelID).set(channelId);
+            channel = doc.child(channelID);
+            channel.child(student.id).set(student.id);
+            student = channel.child(student.id)
+            student.set(answers);
+        }
+    }
+    else{
+            console.log(false);
+            dialyStandUpDB.child(date).set(date); 
+            doc.child(channelID).set(channelId);
+            channel = doc.child(channelID);
+            channel.child(student.id).set(student.id);
+            student = channel.child(student.id)
+            student.set(answers);
+    }
+}
+
+function get_Date(){
+    
+    var D = new Date();
+    let day = D.getDate().toString();
+    let month = D.getMonth().toString();
+    let year = D.getFullYear().toString();
+
+    let date = year + month + day
+
+    return date;
 }
 
 module.exports = {
