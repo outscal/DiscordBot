@@ -75,9 +75,8 @@ function standUpCommands(message, client, db) {
     let answers = {
       did: "",
       plan: "",
-      problem: "",
-      channelId: "",
-      studentId: "",
+      problem: ""
+    
     };
     message.channel.send("what you did today");
 
@@ -158,35 +157,38 @@ function saveToDataBase(dialyStandUpDB, channel, student, answers) {
   //console.log(channelID,student.id,answers);
   console.log("bd is called");
   var channelID= channel.id;
-  var StudentID = student.id;
+  var studentID = student.id;
   var date = get_Date();
   var dailyStandUp=dialyStandUpDB.child(date);
 
   if(dailyStandUp.key != date ){
       dialyStandUpDB.set(date);
+      dailyStandUp= dialyStandUpDB.child(date)
   }
 var channelNode = dailyStandUp.child(channelID);
 if(channelNode.key != channelNode){
-    channelNode.set(channelID);
+    dailyStandUp.set(channelID);
+    channelNode = dailyStandUp.child(channelID);
 }
 
-// var studentNode = channelNode.child(StudentID);
+var studentNode = channelNode.child(studentID);
 
-// if(studentNode.key != studentNode){
-//     studentNode.set(studentID);
-// }
+if(studentNode.key != studentNode){
+        channelNode.set(studentID);
+        studentNode = channelNode.child(studentID);
+ }
 
-// studentNode.update({
-//     answers
-// })
+studentNode.update({
+    answers
+})
 
 
- channelNode.update({
-     studentId:{
-         answers
+//  channelNode.update({
+//      studentId:{
+//          answers
 
-     }
- })
+//      }
+//  })
 
   
 }
