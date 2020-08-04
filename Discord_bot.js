@@ -7,6 +7,8 @@ const Command = require('./Response/BotCammands.js');
 const dotenv = require('dotenv');
 const { setupFirebase } = require('./Firebase/firebase');
 const StandupConfigData = require('./StandupConfigData');
+const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
+const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 dotenv.config();
 
 const client = new Discord.Client();
@@ -18,6 +20,7 @@ const adminDatabase = setupFirebase();
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
+
     //generalChannel = client.channels.get(process.env.GENERAL_CHANNEL_ID);
 });
 
@@ -45,6 +48,17 @@ client.on('message', async msg => {
         // } 
         else if (msg.content == '!help') {
             msg.reply(Command.Help());
+        } 
+        else if (msg.content == '!Leaderboardtest') {
+            //leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+            //leaderboardmodule.MakeCopyOfLeaderBoard();
+            // studentData = new LeaderBoardStudentData();
+            // studentData.ChannelId = "12";
+            // studentData.StudentId = 30;
+            // studentData.Score = leaderboardmodule.CalculateScore();
+            // leaderboardmodule.setupLeaderBoardDB(studentData);
+            // leaderboardmodule.CreateLeaderBoardDBServer();
+            //leaderboardmodule.GetPreviousDate();
         } 
         else if (msg.content.startsWith("!giverole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) { 
