@@ -18,11 +18,11 @@ var setupFirebase = function setupFirebase() {
 
     // As an admin, the app has access to read and write all data, regardless of Security Rules
     var db = admin.database();
-    database = db.ref("/StandupConfig");
-    database.once("value", function(snapshot) {
-        console.log(snapshot.val());
-    });
-    return database;
+    // database = db.ref("/StandupConfig");
+    // database.once("value", function(snapshot) {
+    //     console.log(snapshot.val());
+    // });
+    return db;
 }
 
 module.exports = {

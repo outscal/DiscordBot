@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Firebase = require('./Firebase/firebase');
 const Command = require('./Response/BotCammands.js');
 //const standupConfigClass = require('./StandupConfigData.js');
-// const DatabaseSystem = require('./DatabaseSystem/SaveSystem');
+// const adminDatabaseSystem = require('./adminDatabaseSystem/SaveSystem');
 
 const dotenv = require('dotenv');
 const { setupFirebase } = require('./Firebase/firebase');
@@ -10,9 +10,9 @@ const StandupConfigData = require('./StandupConfigData');
 dotenv.config();
 
 const client = new Discord.Client();
-const database = setupFirebase();
+const adminDatabase = setupFirebase();
 
-//DatabaseSystem.SetupSQLDatabase();
+//adminDatabaseSystem.SetupSQLadminDatabase();
 //var generalChannel;
 
 client.login(process.env.DISCORD_APP_TOKEN); 
@@ -29,7 +29,7 @@ client.on('message', async msg => {
         //         ID: msg.author.id,
         //         UserName: msg.author.username
         //     }
-        //     DatabaseSystem.CreateUser(userInfo);
+        //     adminDatabaseSystem.CreateUser(userInfo);
         //     msg.reply("Welcome! Please introduce yourself to the rest of the clan.");
         // } 
         if (msg.content == 'ping') {
@@ -99,27 +99,28 @@ client.on('message', async msg => {
                 const roledatabyid = msg.guild.roles.cache.find(role=>role.id == resroleid);
                 standupData = new StandupConfigData(resroleid,reschannelid,timesplit[0],timesplit[1],timesplit[2]);
                 var rolename = roledatabyid.name;
+                var StandupConfigDB = adminDatabase.ref("/StandupConfig");
                 if(rolename != null){
-                    // database is firebase here and its child has same name as rolename
-                    if(database.child(rolename) == rolename){
-                        var dbchild = database.child(rolename); 
+                    // adminDatabase is firebase here and its child has same name as rolename
+                    if(StandupConfigDB.child(rolename) == rolename){
+                        var dbchild = StandupConfigDB.child(rolename); 
                         dbchild.update({
                             standupData
                         });
                     }
                     else{
-                        var dbchild = database.child(rolename); 
+                        var dbchild = StandupConfigDB.child(rolename); 
                         dbchild.set(standupData);
                     }
                 }else{
-                    if(database.child(resroleid) == resroleid){
-                        var dbchild = database.child(resroleid); 
+                    if(StandupConfigDB.child(resroleid) == resroleid){
+                        var dbchild = StandupConfigDB.child(resroleid); 
                         dbchild.update({
                             standupData
                         });
                     }
                     else{
-                        var dbchild = database.child(resroleid); 
+                        var dbchild = StandupConfigDB.child(resroleid); 
                         dbchild.set(standupData);
                     }
                 }               
@@ -146,7 +147,7 @@ client.on('message', async msg => {
         //     for (var i = 0; i < msg.mentions.users.size; i++) {
         //         console.log(msg.mentions.users.array()[i].id);
         //         if (msg.mentions.users.array()[i].id != msg.author.id) {
-        //             DatabaseSystem.UpdateKarmaPoints(msg.mentions.users.array()[i].id);
+        //             databaseSystem.UpdateKarmaPoints(msg.mentions.users.array()[i].id);
         //             SendMessageToChannel("Karma point awarded to:" + msg.mentions.user.array()[i].id,msg.channel.id);
         //         }
         //     }
@@ -170,7 +171,7 @@ client.on('message', async msg => {
 //                 UserName: msg.channel.members.array()[i].user.username
 //             }
 //         }
-//         DatabaseSystem.CreateUser(userInfo);
+//         databaseSystem.CreateUser(userInfo);
 //     }
 // }
 
