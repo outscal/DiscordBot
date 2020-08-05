@@ -97,23 +97,23 @@ function standUpCommands(message, client, guild, db) {
               .then((collected) => {
                 answers.problem = collected.first().content;
 
-                const user = guild.members.cache.get(message.author.id);
-                // picking the rolename as rolename and channel name is same
-                const channelName = user.roles.cache.first().name;
-                console.log("Channel picked: "+ channelName);
-                const destinationChannel = guild.channels.cache.find(
-                  (channel) => channel.name == channelName
-                );
-                console.log("Destination channel: " + destinationChannel.channelName + ", " + destinationChannel.channelID);
-                const channel = destinationChannel; // pass this to calculate leaderboard score
-                const student = message.author; // pass this to calculate leaderboard score
-                const updateEmbed = new Discord.MessageEmbed()
+                var user = guild.members.cache.get(message.author.id);
+                var batchRole = user.roles.cache.find(role => role.name.includes("batch"));
+                console.log("BatchRole: " + batchRole.name);
+
+                var destinationChannel = guild.channels.cache.find(channel => channel.name === batchRole.name);
+                console.log("Channel: " + destinationChannel.name);
+                // console.log("Destination channel: " + destinationChannel.channelName + ", " + destinationChannel.channelID);
+
+                var updateEmbed = new Discord.MessageEmbed()
                   .setColor("#0099ff")
-                  .setTitle(`${message.author.username} progress updates`)
-                  .addFields(
+                  // .setTitle(`${message.author.username} progress updates`)
+                  .setTitle(`Progress Update -`)
+                  .setAuthor(message.author.username)
+                  .addFields([
                     { name: message1, value: answers.did },
                     { name: message2, value: answers.plan, },
-                    { name: message3, value: answers.problem }
+                    { name: message3, value: answers.problem }]
                   )
                   .setTimestamp();
                 destinationChannel.send(updateEmbed);
@@ -124,7 +124,7 @@ function standUpCommands(message, client, guild, db) {
                 // }
                 // right now sending in generic confirmation message to the user 
                 message.channel.send(message4);
-                saveToDataBase(dialyStandUpDB, channel, student, answers); // saving the standup answers to db
+                saveToDataBase(dialyStandUpDB, destinationChannel, message.author, answers); // saving the standup answers to db
               })
               .catch((collected) => {
                 message.channel.send(messageTimeout);
