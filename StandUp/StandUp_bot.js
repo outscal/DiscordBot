@@ -71,13 +71,14 @@ function standUpCommands(message, client, db) {
 //     // saveToDataBase(dialyStandUpDB);
 //   }
 
-  if (msg.startsWith("start")) {
+  // TODO need safety checks - what is the user starts the standup message with the word "start"?
+  if (msg.startsWith("start") && msg.channel.type == "dm") {
     let answers = {
       did: "",
       plan: "",
       problem: ""
-    
     };
+
     message.channel.send("what you did today");
 
     const filter = (m) => !m.author.bot;

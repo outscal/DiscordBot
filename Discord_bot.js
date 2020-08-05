@@ -214,7 +214,7 @@ client.on('message', async msg => {
     //     }
     // }
   }
-});
+);
 
 // function SetupBotForChannel(msg){
 //     for (var i = 0; i < msg.channel.members.size; i++) {
