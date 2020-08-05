@@ -1,8 +1,6 @@
-
 const standup = require("./StandUp/StandUp_bot");
-
 const Discord = require('discord.js');
-const Firebase = require('./Firebase/firebase');
+const Firebase = require('./Firebase/firebase.js');
 const Command = require('./Response/BotCammands.js');
 //const standupConfigClass = require('./StandupConfigData.js');
 // const adminDatabaseSystem = require('./adminDatabaseSystem/SaveSystem');
@@ -14,26 +12,27 @@ const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
 const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 
 dotenv.config();
-const { setupFirebase } = require("./Firebase/firebase");
-const adminDatabase  = setupFirebase();
 
+const serverID = "536834108077113364"; // Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
 
-//adminDatabaseSystem.SetupSQLadminDatabase();
-//var generalChannel;
+// main Outscal guild object - use this everywhere 
+var myGuild; 
 
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-
     //generalChannel = client.channels.get(process.env.GENERAL_CHANNEL_ID);
-    standup.getDataAndSchdule(adminDatabase,client);
+    myGuild = client.guilds.resolve(serverID);
+    console.log("Myguild id: " + myGuild.id);
+    standup.getDataAndSchdule(adminDatabase, client, myGuild);
 });
 
 client.on('message', async msg => {
-    standup.standUpCommands(msg, client,adminDatabase);
-    if (msg.author.username != "Bot_helper") {
+    if (msg.channel.type == "dm") {
+        standup.standUpCommands(msg, client, myGuild, adminDatabase);
+    } else if (msg.author.username != "Bot_helper") {
         // if (msg.type == "GUILD_MEMBER_JOIN") {
         //     console.log("User Joined" + msg.author.username + " " + msg.author.id);
         //     var userInfo = {
