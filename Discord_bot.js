@@ -1,3 +1,6 @@
+
+const standup = require("./StandUp/StandUp_bot");
+
 const Discord = require('discord.js');
 const Firebase = require('./Firebase/firebase');
 const Command = require('./Response/BotCammands.js');
@@ -9,7 +12,10 @@ const { setupFirebase } = require('./Firebase/firebase');
 const StandupConfigData = require('./StandupConfigData');
 const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
 const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
+
 dotenv.config();
+const { setupFirebase } = require("./Firebase/firebase");
+const adminDatabase  = setupFirebase();
 
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
@@ -22,9 +28,11 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 
     //generalChannel = client.channels.get(process.env.GENERAL_CHANNEL_ID);
+    standup.getDataAndSchdule(adminDatabase,client);
 });
 
 client.on('message', async msg => {
+    standup.standUpCommands(msg, client,adminDatabase);
     if (msg.author.username != "Bot_helper") {
         // if (msg.type == "GUILD_MEMBER_JOIN") {
         //     console.log("User Joined" + msg.author.username + " " + msg.author.id);
@@ -88,21 +96,22 @@ client.on('message', async msg => {
                 }               
             }
         }
-        else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
-            if(msg.member.roles.cache.some(role => role.name === 'team')) 
-            { 
-                // command as !createrole rolename ['permissions','permission2']
-                var splitMsgContents = msg.content.split(" ");    // splitting command content
-                var roleName = splitMsgContents[1];
-                var rolePermissions = splitMsgContents[2];
-                var defaultPerms = ['MANAGE_MESSAGES', 'KICK_MEMBERS'];
-                if(rolePermissions == null)
-                {
-                    rolePermissions = defaultPerms;
-                }
-                msg.guild.roles.create({data:{name:roleName,permissions:rolePermissions}});
+    }
+    else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
+        if(msg.member.roles.cache.some(role => role.name === 'team')) 
+        { 
+            // command as !createrole rolename ['permissions','permission2']
+            var splitMsgContents = msg.content.split(" ");    // splitting command content
+            var roleName = splitMsgContents[1];
+            var rolePermissions = splitMsgContents[2];
+            var defaultPerms = ['MANAGE_MESSAGES', 'KICK_MEMBERS'];
+            if(rolePermissions == null)
+            {
+                rolePermissions = defaultPerms;
             }
+            msg.guild.roles.create({data:{name:roleName,permissions:rolePermissions}});
         }
+
         else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {           
             if(msg.member.roles.cache.some(role => role.name === 'team')) {
                 var splitMsgContents = msg.content.split(" ");    // !configstandup roleid channelid time1,time2,time3 time format 00:00 24hr format    
@@ -150,10 +159,30 @@ client.on('message', async msg => {
                 if(channelReason == null){
                     channelReason = "Outscal Server for education";
                 }
-                msg.guild.channels.create(channelName, { reason: channelReason });
+            }else{
+                if(StandupConfigDB.child(resroleid) == resroleid){
+                    var dbchild = StandupConfigDB.child(resroleid); 
+                    dbchild.update({
+                        standupData
+                    });
+                }
+                else{
+                    var dbchild = StandupConfigDB.child(resroleid); 
+                    dbchild.set(standupData);
+                }
+            }               
+        }      
+    }
+    else if (msg.content.startsWith("!createchannel") && msg.channel.name === "bot"){
+        if(msg.member.roles.cache.some(role => role.name === 'team')) {
+            var splitMsgContents = msg.content.split(" ");    // splitting command content
+            var channelName = splitMsgContents[1];
+            var channelReason = splitMsgContents[2];
+            if(channelReason == null){
+                channelReason = "Outscal Server for education";
             }
+            msg.guild.channels.create(channelName, { reason: channelReason });
         }
-        
         else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {           
             msg.reply("Your Discord Id is : " + msg.author);    
             //SendMessageToChannel(reply, msg.channel.id);       
@@ -169,7 +198,23 @@ client.on('message', async msg => {
         //     }
         // }
     }
-}); 
+    
+    else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {           
+        msg.reply("Your Discord Id is : " + msg.author);    
+        //SendMessageToChannel(reply, msg.channel.id);       
+    }
+    // else if (msg.content.includes("thank")) {
+    //     //console.log(msg.mentions.users.array()[0]);
+    //     for (var i = 0; i < msg.mentions.users.size; i++) {
+    //         console.log(msg.mentions.users.array()[i].id);
+    //         if (msg.mentions.users.array()[i].id != msg.author.id) {
+    //             databaseSystem.UpdateKarmaPoints(msg.mentions.users.array()[i].id);
+    //             SendMessageToChannel("Karma point awarded to:" + msg.mentions.user.array()[i].id,msg.channel.id);
+    //         }
+    //     }
+    // }
+  }
+});
 
 // function SetupBotForChannel(msg){
 //     for (var i = 0; i < msg.channel.members.size; i++) {
@@ -211,11 +256,15 @@ client.on('message', async msg => {
 //     return receivedMessage.content.includes(client.user.toString())
 // }
 function ListOfChannels(guild) {
-    guild.channels.forEach((channel) => {
-        console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`);
-    })
+  guild.channels.forEach((channel) => {
+    console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`);
+  });
 }
 
-function SendMessageToChannel(message,channelID) {
-    client.channels.cache.get(channelID).send(message);
+function SendMessageToChannel(message, channelID) {
+  client.channels.cache.get(channelID).send(message);
 }
+
+// standup configs below
+
+// standup configs above

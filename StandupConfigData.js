@@ -8,4 +8,5 @@ class StandupConfigData{
     }
 }
 
-module.exports = StandupConfigData
+
+modules.exports = StandupConfigData
