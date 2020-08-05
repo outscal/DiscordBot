@@ -8,4 +8,5 @@ class StandupConfigData{
     }
 }
 
+
 modules.exports = StandupConfigData

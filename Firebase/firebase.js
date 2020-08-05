@@ -18,25 +18,11 @@ var setupFirebase = function setupFirebase() {
 
     // As an admin, the app has access to read and write all data, regardless of Security Rules
     var db = admin.database();
-     database = db.ref("/StandupConfig");
-     var batch = "cpp-batch-10122";
-     var test = database.child(batch);
- 
-     if(test.key != batch){ 
-         database.set(batch);
-         test = database.child(batch);
-     }
- 
-     test.update({
-         'user_id_2' : {
-             "test_10": "new value",
-             "test_20": "new value",
-             "test_100": "new value",
-         }
-     });
+
+    // database = db.ref("/StandupConfig");
     // database.once("value", function(snapshot) {
-        //console.log(snapshot.val());
-    //});
+    //     console.log(snapshot.val());
+    // });
     return db;
 }
 

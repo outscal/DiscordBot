@@ -1,6 +1,5 @@
 DatabaseSystem = require('../DatabaseSystem/SaveSystem');
 const Discord = require('discord.js');
-const GoogleSpreadSheet = require('google-spreadsheet');
 
 var LeaderBoard = function LeaderBoard() {
     return new Promise(async resolve => {
