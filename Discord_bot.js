@@ -13,7 +13,6 @@ dotenv.config();
 
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
-
 //adminDatabaseSystem.SetupSQLadminDatabase();
 //var generalChannel;
 
@@ -50,16 +49,17 @@ client.on('message', async msg => {
             msg.reply(Command.Help());
         } 
         else if (msg.content == '!Leaderboardtest') {
-            // leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
-            // leaderboardmodule.MakeCopyOfLeaderBoard();
-            // studentData = new LeaderBoardStudentData();
-            // studentData.ChannelId = "12";
-            // studentData.StudentId = 31;
-            // studentData.Streak = 0;//leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
-            // studentData.IsStreak = true;
-            // studentData.Score = 0;//leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId);
-            // leaderboardmodule.setupLeaderBoardDB(studentData);
-            // leaderboardmodule.CreateLeaderBoardDBServer();
+            leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+            //leaderboardmodule.MakeCopyOfLeaderBoard();
+            studentData = new LeaderBoardStudentData();
+            studentData.ChannelId = "12";
+            studentData.StudentId = 30;
+            studentData.Streak = 0;//leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
+            studentData.IsStreak = true;
+            leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId,returnScore);
+            studentData.Score = 0;
+            leaderboardmodule.setupLeaderBoardDB(studentData);
+            leaderboardmodule.CreateLeaderBoardDBServer();
             //leaderboardmodule.GetPreviousDate();
         } 
         else if (msg.content.startsWith("!giverole") && msg.channel.name === "bot"){
@@ -218,4 +218,8 @@ function ListOfChannels(guild) {
 
 function SendMessageToChannel(message,channelID) {
     client.channels.cache.get(channelID).send(message);
+}
+
+function returnScore(score,dbToUpdate){
+    dbToUpdate.child("Score").set(score);
 }
