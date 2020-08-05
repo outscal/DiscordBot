@@ -55,6 +55,19 @@ client.on('message', async msg => {
         // } 
         else if (msg.content == '!help') {
             msg.reply(Command.Help());
+        } else if (msg.content == '!Leaderboardtest') {
+            // leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+            // //leaderboardmodule.MakeCopyOfLeaderBoard();
+            // studentData = new LeaderBoardStudentData();
+            // studentData.ChannelId = "12";
+            // studentData.StudentId = 30;
+            // studentData.Streak = 0;//leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
+            // studentData.IsStreak = true;
+            // leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId,returnScore);
+            // studentData.Score = 0;
+            // leaderboardmodule.setupLeaderBoardDB(studentData);
+            // leaderboardmodule.CreateLeaderBoardDBServer();
+            //leaderboardmodule.GetPreviousDate();
         } 
         else if (msg.content == '!Leaderboardtest') {
             // leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
@@ -264,6 +277,12 @@ function SendMessageToChannel(message, channelID) {
   client.channels.cache.get(channelID).send(message);
 }
 
+function returnScore(score,dbToUpdate){
+    dbToUpdate.child("Score").set(score);
+}
+
 // standup configs below
 
 // standup configs above
+
+
