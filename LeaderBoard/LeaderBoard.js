@@ -8,7 +8,7 @@ let date_ob = new Date();  // gives code todays date
 saveStudentData = new LeaderBoardStudentData; // stored studentdata to be used in one function
 //Dates 
 var prevMonth,prevDay ,prevYear,yesterday  = null;
-
+var prevStudentData = 100;
 //always call this before using any function of this file
 var InitLeaderBoardDatabase = function InitLeaderBoardDatabase(sendAdminDB){
     DbReference = sendAdminDB;
@@ -60,6 +60,7 @@ var MakeCopyOfLeaderBoard = function MakeCopyOfLeaderBoard(){
         //as PreviousDayChannelinfo holds value for last day database so we need value 
         PreviousDayChannelinfo.once("value", function(snapshot) {
             console.log(snapshot.val());
+            //var data = snapshot.val(); after copy make a function to make all the isStreak value false for today
             dayLevel.set(snapshot.val());// as we changed day level to today but update db with previous day data
         });
     }
@@ -104,19 +105,36 @@ var CreateLeaderBoardDBServer = function CreateLeaderBoardDBServer(){
     }
     
 }
-var CalculateScore = function CalculateScore(ChannelId,studentid){
-    streak = CalculateStreak(ChannelId,studentid);
-    var presentStudentData = null;
-    var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+Studentid);
-    presentStudentDb.once("value", function(snapshot) {
-        presentStudentData =  snapshot.val();
-    });
-    if(streak == 0){
-        return presentStudentData.Score + 1;
+var CalculateScore = function CalculateScore(ChannelId,studentid,returnScore){
+
+    var presentYear = date_ob.getFullYear();
+    var presentMonth = date_ob.getMonth()+1;
+    var presentDay = date_ob.getDate();
+    var prevDayDb = DbReference.ref("/LeaderBoard/"+prevYear+"/"+prevMonth+"/"+prevDay+"/"+ChannelId+"/"+studentid);
+    var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+studentid);
+
+    prevDayDb.on('value',gotData,errData);
+    function gotData(data){
+        prevStudentData = data.val().Score;
+        //console.log(data.val().Score);
+        returnScore(prevStudentData+1,presentStudentDb);
     }
-    else{
-        return presentStudentData.Score + 1 + streak;
+    function errData(error){
+        console.log(error);
     }
+//     streak = CalculateStreak(ChannelId,studentid);
+//     var presentStudentData = null;
+//     var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+Studentid);
+//     presentStudentDb.once("value", function(snapshot) {
+//         presentStudentData =  snapshot.val();
+//     });
+//     if(streak == 0){
+//         // when changing make it previous day.score +1
+//         return presentStudentData.Score + 1;
+//     }
+//     else{
+//         return presentStudentData.Score + 1 + streak;
+//     }
 }
 
 var CalculateStreak = function CalculateStreak(ChannelId,studentid){
@@ -176,10 +194,13 @@ var CalculateStreak = function CalculateStreak(ChannelId,studentid){
 
 var GetPreviousDate = function GetPreviousDate(){
     var yesterday = moment().subtract(1, 'days');//https://momentjs.com/
-    console.log(yesterday.format('l'));// many formats go on website
+    //console.log(yesterday.format('l'));// many formats go on website
     return yesterday.format('l'); //dd/mm/yyyy
 }
 
+var GetLeaderBoard = function GetLeaderBoard(){
+
+}
 // creates / updates server 
 
 
