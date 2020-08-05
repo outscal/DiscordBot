@@ -50,12 +50,14 @@ client.on('message', async msg => {
             msg.reply(Command.Help());
         } 
         else if (msg.content == '!Leaderboardtest') {
-            //leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
-            //leaderboardmodule.MakeCopyOfLeaderBoard();
+            // leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+            // leaderboardmodule.MakeCopyOfLeaderBoard();
             // studentData = new LeaderBoardStudentData();
             // studentData.ChannelId = "12";
-            // studentData.StudentId = 30;
-            // studentData.Score = leaderboardmodule.CalculateScore();
+            // studentData.StudentId = 31;
+            // studentData.Streak = 0;//leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
+            // studentData.IsStreak = true;
+            // studentData.Score = 0;//leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId);
             // leaderboardmodule.setupLeaderBoardDB(studentData);
             // leaderboardmodule.CreateLeaderBoardDBServer();
             //leaderboardmodule.GetPreviousDate();
