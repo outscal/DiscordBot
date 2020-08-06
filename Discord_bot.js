@@ -2,8 +2,6 @@ const standup = require("./StandUp/StandUp_bot");
 const Discord = require('discord.js');
 const Firebase = require('./Firebase/firebase.js');
 const Command = require('./Response/BotCammands.js');
-//const standupConfigClass = require('./StandupConfigData.js');
-// const adminDatabaseSystem = require('./adminDatabaseSystem/SaveSystem');
 
 const dotenv = require('dotenv');
 const { setupFirebase } = require('./Firebase/firebase');
@@ -23,7 +21,6 @@ var myGuild;
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    //generalChannel = client.channels.get(process.env.GENERAL_CHANNEL_ID);
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
@@ -94,7 +91,7 @@ client.on('message', async msg => {
                                 studentmember.roles.add(roleToAssign);
                                 msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
                     }*/
-                }               
+                }
             }
         }
         else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {           
@@ -203,45 +200,6 @@ client.on('message', async msg => {
     // }
 );
 
-// function SetupBotForChannel(msg){
-//     for (var i = 0; i < msg.channel.members.size; i++) {
-//         var userInfo = { };
-//         if(msg.channel.members.array()[i].nickname!=null){
-//             console.log(msg.channel.members.array()[i].nickname)
-//             userInfo = {
-//                 ID: msg.channel.members.array()[i].user.id,
-//                 UserName: msg.channel.members.array()[i].nickname
-//             }
-//         }else{
-//             console.log(msg.channel.members.array()[i].user.username);
-//             userInfo = {
-//                 ID: msg.channel.members.array()[i].user.id,
-//                 UserName: msg.channel.members.array()[i].user.username
-//             }
-//         }
-//         databaseSystem.CreateUser(userInfo);
-//     }
-// }
-
-// function SendAttatchment(link) {
-//     // Provide a path to a local file or link
-//     const localFileAttachment = new Discord.Attachment(link);
-//     generalChannel.send(localFileAttachment);
-// }
-
-// function ListOfServers() {
-//     // List servers the bot is connected to
-//     console.log("Servers:")
-//     client.guilds.forEach((guild) => {
-//         console.log(" - " + guild.name);
-//         ListOfChannels(guild);
-
-//     })
-// }
-
-// function ifTagged(receivedMessage) {
-//     return receivedMessage.content.includes(client.user.toString())
-// }
 function ListOfChannels(guild) {
   guild.channels.forEach((channel) => {
     console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`);
@@ -255,9 +213,3 @@ function SendMessageToChannel(message, channelID) {
 function returnScore(score,dbToUpdate){
     dbToUpdate.child("Score").set(score);
 }
-
-// standup configs below
-
-// standup configs above
-
-
