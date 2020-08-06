@@ -1,7 +1,10 @@
 var ua = require('universal-analytics');
 // var DEBUG=universal-analytics
 
-var visitor = ua('G-CWF7XKE5XB').debug(true);
+// const {GA_TRACKING_ID} = process.env;
+const GA_TRACKING_ID = "G-ABC";
+
+var visitor = ua(GA_TRACKING_ID).debug(true);
 // var visitor = ua('G-CWF7XKE5XB');
 // visitor.pageview("/hello", function (err) {
 //     if(err){ 
@@ -25,9 +28,6 @@ visitor.event(params, function (err){
 // The following environment variable is set by app.yaml when running on App
 // Engine, but will need to be set manually when running locally. See README.md.
 const got = require('got');
-
-// const {GA_TRACKING_ID} = process.env;
-const GA_TRACKING_ID = "G-CWF7XKE5XB";
 
 const trackEvent = (category, action, label, value) => {
   const data = {
