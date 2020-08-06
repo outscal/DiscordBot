@@ -1,5 +1,7 @@
-// var ua = require('universal-analytics');
+var ua = require('universal-analytics');
+// var DEBUG=universal-analytics
 
+var visitor = ua('G-CWF7XKE5XB').debug(true);
 // var visitor = ua('G-CWF7XKE5XB');
 // visitor.pageview("/hello", function (err) {
 //     if(err){ 
@@ -9,17 +11,16 @@
 //     }
 // });
 
-// var params = {
-//     ec: "Event Category",
-//     ea: "Event Action",
-//     el: "…and a label",
-//     ev: 42,
-//     _dbg: 1,
-//   };
+var params = {
+    ec: "Event Category",
+    ea: "Event Action",
+    el: "…and a label",
+    ev: 42,
+  };
   
-//   visitor.event(params, function (err){ 
-//       console.log(err);
-//   });
+visitor.event(params, function (err){ 
+    console.log("Error: " + err);
+});
 
 // The following environment variable is set by app.yaml when running on App
 // Engine, but will need to be set manually when running locally. See README.md.
@@ -50,7 +51,7 @@ const trackEvent = (category, action, label, value) => {
     _dbg: 1,
   };
 
-  return got.post('http://www.google-analytics.com/collect', data);
+  got.post('http://www.google-analytics.com/collect', data);
 };
 
 trackEvent(
