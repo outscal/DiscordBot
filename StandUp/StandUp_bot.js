@@ -11,20 +11,24 @@ const message4 = "Thanks for submitting your update!";
 const messageTimeout = `Timed out! Please start again using the "start" command`;
 
 
+
 function getDataAndSchdule(db, client, guild) {
+
   var database = db.ref("/StandupConfig");
   database.on("value", function (snapShot) {
     snapShot.forEach((channel) => {
       if (channel.val().IsON) {  // checking for channel has active standup 
         var channelName = channel.key;
-
+        var resroleid = channel.val().RoleId;
+        var reschannelid = channel.val().ChannelId;
+        console.log(channelName);
         if (channel.val().StandupEveningTime) {
           var time = channel.val().StandupEveningTime;
           time = time.split(":");
           hour = time[0];
           min = time[1];
           //console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
-          StandUpscheduler(channelName, hour, min, client, guild);
+          StandUpscheduler(resroleid,reschannelid, hour, min, client, guild);
         }
 
         if (channel.val().StandupMorningTime) {
@@ -33,32 +37,39 @@ function getDataAndSchdule(db, client, guild) {
           hour = time[0];
           min = time[1];
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
-          StandUpscheduler(channelName, hour, min, client, guild);
+          StandUpscheduler(resroleid,reschannelid, hour, min, client, guild);
+
         }
       }
     });
   });
 }
 
-function StandUpscheduler(channelName, hour, min, client, guild) {
+function StandUpscheduler(resroleid,reschannelid, hour, min, client, guild) {
   //console.log(`scheduled for channel: ${channelName} at ${hour}:${min}` )
   schedule.scheduleJob(`${min} ${hour} * * *`, function () {
-    startStandUp(channelName, client, guild);
+    startStandUp(resroleid,reschannelid,client, guild);
+    // leader board copy logic here
   });
 }
 
-function startStandUp(channelName, client, guild) {
-  console.log("reminder for", channelName);
+function startStandUp(resroleid,reschannelid, client, guild) {
+  console.log("reminder for", reschannelid);
   const stantUpStartMessage = new MessageEmbed()
     .setTitle(`Reminder for Daily Standup`)
     .setColor(0x16a085)
     .setDescription("start by command 'start'");
 
   // const myGuild = client.guilds.cache.get(serverID); 
-  guild.members.cache.map((user) => {
-    if (user.roles.cache.first().name == channelName) {
-      user.send(stantUpStartMessage).catch(console.error);
+  guild.members.cache.map((user) => { 
+    var batchRole = user.roles.cache.find(role => role.name.includes("batch"));//returns roleid which has name of batch in it 
+    if (batchRole == resroleid) {
+       user.send(stantUpStartMessage).catch(console.error);
     }
+    // if (user.roles.cache.first().name == channelinfo.id) 
+    // {
+    //   user.send(stantUpStartMessage).catch(console.error);
+    // }
   });
 }
 
@@ -96,7 +107,6 @@ function standUpCommands(message, client, guild, db) {
               .awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] })
               .then((collected) => {
                 answers.problem = collected.first().content;
-
                 var user = guild.members.cache.get(message.author.id);
                 var batchRole = user.roles.cache.find(role => role.name.includes("batch"));
                 console.log("BatchRole: " + batchRole.name);
