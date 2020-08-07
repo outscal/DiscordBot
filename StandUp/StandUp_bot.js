@@ -21,7 +21,7 @@ function getDataAndSchdule(db, client, guild) {
         var channelName = channel.key;
         var resroleid = channel.val().RoleId;
         var reschannelid = channel.val().ChannelId;
-        console.log(channelName);
+        //console.log(channelName);
         if (channel.val().StandupEveningTime) {
           var time = channel.val().StandupEveningTime;
           time = time.split(":");
@@ -54,7 +54,7 @@ function StandUpscheduler(resroleid,reschannelid, hour, min, client, guild) {
 }
 
 function startStandUp(resroleid,reschannelid, client, guild) {
-  console.log("reminder for", reschannelid);
+  //console.log("reminder for", reschannelid);
   const stantUpStartMessage = new MessageEmbed()
     .setTitle(`Reminder for Daily Standup`)
     .setColor(0x16a085)
