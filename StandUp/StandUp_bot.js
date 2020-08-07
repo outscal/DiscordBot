@@ -8,7 +8,8 @@ function getDataAndSchdule(db, client) {
   var database = db.ref("/StandupConfig");
   database.on("value", function (snapShot) {
     snapShot.forEach((channel) => {
-      if (channel.val().IsON) {  // checking for channel has active standup 
+      if (channel.val().IsON) {
+        // checking for channel has active standup
         var channelName = channel.key;
 
         if (channel.val().StandupEveningTime) {
@@ -51,7 +52,7 @@ function startStandUp(channelName, client) {
     // Set the main content of the embed
     .setDescription("start by command 'start'");
   var serverID = "736892439868080130";
-  const myGuild = client.guilds.cache.get(serverID); 
+  const myGuild = client.guilds.cache.get(serverID);
   myGuild.members.cache.map((user) => {
     if (user.roles.cache.first().name == channelName) {
       user.send(stantUpStartMessage).catch(console.error);
@@ -60,23 +61,21 @@ function startStandUp(channelName, client) {
 }
 
 function standUpCommands(message, client, db) {
-
   var dialyStandUpDB = db.ref("/daily_standups");
-  
+
   const msg = message.content.toLowerCase();
-  
-//   if (msg == "!channelid") {
-//     message.reply(message.channel.id);
-//     console.log(dialyStandUpDB.key);
-//     // saveToDataBase(dialyStandUpDB);
-//   }
+
+  //   if (msg == "!channelid") {
+  //     message.reply(message.channel.id);
+  //     console.log(dialyStandUpDB.key);
+  //     // saveToDataBase(dialyStandUpDB);
+  //   }
 
   if (msg.startsWith("start")) {
     let answers = {
       did: "",
       plan: "",
-      problem: ""
-    
+      problem: "",
     };
     message.channel.send("what you did today");
 
@@ -106,7 +105,7 @@ function standUpCommands(message, client, db) {
 
                 const myGuild = client.guilds.cache.get("736892439868080130");
                 const user = myGuild.members.cache.get(message.author.id);
-                const channelName = user.roles.cache.first().name;        // picking the rolename as rolename and channel name is same
+                const channelName = user.roles.cache.first().name; // picking the rolename as rolename and channel name is same
                 const destinationChannel = myGuild.channels.cache.find(
                   (channel) => channel.name == channelName
                 );
@@ -129,15 +128,12 @@ function standUpCommands(message, client, db) {
                 destinationChannel.send(updateEmbed);
 
                 // call the leaderboard function here with arg(channel,student){
-                //     inside this calculate the LeaderBoard score and put on dm 
+                //     inside this calculate the LeaderBoard score and put on dm
 
                 //     message : All done! Congrats for maintaining a streak for X days!"
                 // }
-                
 
                 saveToDataBase(dialyStandUpDB, channel, student, answers); // saving the standup answers to db
-
-                
               })
               .catch((collected) =>
                 message.channel.send(`timeout start again with command "start"`)
@@ -154,53 +150,43 @@ function standUpCommands(message, client, db) {
 }
 
 function saveToDataBase(dialyStandUpDB, channel, student, answers) {
-  //console.log(channelID,student.id,answers);
-  console.log("bd is called");
-  var channelID= channel.id;
+  var channelID = channel.id;
   var studentID = student.id;
   var date = get_Date();
-  var dailyStandUp=dialyStandUpDB.child(date);
+  var dailyStandUp = dialyStandUpDB.child(date);
 
-  if(dailyStandUp.key != date ){
-      dialyStandUpDB.set(date);
-      dailyStandUp= dialyStandUpDB.child(date)
+  if (dailyStandUp.key != date) {
+    dialyStandUpDB.set(date);
+    dailyStandUp = dialyStandUpDB.child(date);
   }
-var channelNode = dailyStandUp.child(channelID);
-if(channelNode.key != channelNode){
+  var channelNode = dailyStandUp.child(channelID);
+  if (channelNode.key != channelNode) {
     dailyStandUp.set(channelID);
     channelNode = dailyStandUp.child(channelID);
-}
+  }
 
-var studentNode = channelNode.child(studentID);
+  var studentNode = channelNode.child(studentID);
 
-if(studentNode.key != studentNode){
-        channelNode.set(studentID);
-        studentNode = channelNode.child(studentID);
- }
+  if (studentNode.key != studentNode) {
+    channelNode.set(studentID);
+    studentNode = channelNode.child(studentID);
+  }
 
-studentNode.update({
-    answers
-})
-
-
-//  channelNode.update({
-//      studentId:{
-//          answers
-
-//      }
-//  })
-
-  
+  channelNode.child(studentID).update({
+    q1: answers.did,
+    q2: answers.plan,
+    q3: answers.problem,
+  });
 }
 
 function get_Date() {
   var D = new Date();
   let day = D.getDate().toString();
-  let month = D.getMonth().toString();
+  let month = (D.getMonth() + 1).toString();
   let year = D.getFullYear().toString();
 
   let date = year + month + day;
-
+  console.log(month);
   return date;
 }
 
