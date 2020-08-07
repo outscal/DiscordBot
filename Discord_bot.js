@@ -8,13 +8,16 @@ const { setupFirebase } = require('./Firebase/firebase');
 const StandupConfigData = require('./StandupConfigData');
 const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
 const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
+const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
+const { FLAGS } = require("discord.js/src/util/BitField");
 
 dotenv.config();
 
 const serverID = "536834108077113364"; // Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
-
+var everyoneid = "536834108077113364";
+var botid = "683632492871417896";
 // main Outscal guild object - use this everywhere 
 var myGuild; 
 
@@ -24,6 +27,8 @@ client.on('ready', () => {
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
+    test();
+
 });
 
 client.on('message', async msg => {
@@ -124,37 +129,141 @@ client.on('message', async msg => {
         else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) 
             { 
-                // command as !createrole rolename permissions,permission2
+                var rolePermissions = [];
+                // command as !createrole rolename permissions,permission2 more help if you do not write permission default perms will be applied
                 var splitMsgContents = msg.content.split(" ");    // splitting command content
                 var roleName = splitMsgContents[1];
-                var rolePermissionsList = splitMsgContents[2].split(",");
-                for(var i =0;i<rolePermissionsList.length;i++){
-                    var rolePermissions = [];
-                    rolePermissions.push(rolePermissionsList[i]);
+                if(splitMsgContents[2] != null){
+                    var rolePermissionsList = splitMsgContents[2].split(",");
+                    for(var i =0;i<rolePermissionsList.length;i++){
+                        rolePermissions.push(rolePermissionsList[i]);
+                    }
                 }
-                var defaultPerms = ['SEND_MESSAGES','Change_Nicknames'];
-                if(rolePermissions == null)
+                var defaultPerms = ["SEND_MESSAGES","VIEW_CHANNEL","SEND_TTS_MESSAGES","MENTION_EVERYONE"];
+                //var defaultPerms = new Discord.Permissions(DEFAULT);
+                if(rolePermissions == "")
                 {
                     rolePermissions = defaultPerms;
+                    //console.log("inside" +rolePermissions);
                     //console.log(typeof(rolePermissions));
                 }
                 //console.log(rolePermissions,roleName);
                 //console.log(typeof(rolePermissions));
-                msg.guild.roles.create({data:{name:roleName,permissions:rolePermissions}});
+                console.log("outside"+rolePermissions);
+                msg.guild.roles.create({data:{name:roleName,permissions:rolePermissions,color: "00FFFF",}});
                 msg.reply("Role :"+roleName+"created with permissions :"+rolePermissions);
             }
         }
         else if (msg.content.startsWith("!createchannel") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) {
                 var splitMsgContents = msg.content.split(" ");  // splitting command content
-                var channelName = splitMsgContents[1];// createchannel channelname channelreason
-                var channelReason = splitMsgContents[2];
+                var channelName = splitMsgContents[1];// !createchannel channelname categoryName rolemap reason
+                var categoryName = splitMsgContents[2];
+                var rolemap = splitMsgContents[3];
+                channelReason = splitMsgContents[4];
                 if(channelReason == null){
                     channelReason = "Outscal Server for education";
                 }
+                var categoryid = myGuild.channels.cache.find(channel => channel.name === categoryName);
+                var rolemapinfo =  myGuild.roles.cache.find(role => role.name === rolemap);
+
                 //console.log(channelName,channelReason);
-                msg.guild.channels.create(channelName, { reason: channelReason });
-                msg.reply("Channel :"+channelName+"created with reason :"+channelReason);
+                myGuild.channels.create(channelName, { reason: channelReason,parent: categoryid,type: "text",permissionOverwrites: [
+                    {
+                        id: msg.guild.id,
+                        deny: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: msg.author.id,
+                        allow: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: everyoneid,
+                        deny: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: rolemapinfo.id ,
+                        allow: ['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
+
+                    },
+                    {
+                        id: botid,
+                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
+                    }
+                ],}).then(console.log("Success"))
+                .catch(console.error);
+                msg.reply("Channel : "+channelName+"created with reason : "+channelReason);
+            }
+        }
+        else if (msg.content.startsWith("!createcategory") && msg.channel.name === "bot"){
+            if(msg.member.roles.cache.some(role => role.name === 'team')) {
+                var splitMsgContents = msg.content.split(" ");  // splitting command content// !createcategory categoryName rolemap reason
+                var categoryName = splitMsgContents[1];
+                var rolemap = splitMsgContents[2];
+                channelReason = splitMsgContents[3];
+                if(channelReason == null){
+                    channelReason = "Outscal Server for education";
+                }
+                //var categoryid = myGuild.channels.cache.find(channel => channel.name === categoryName);
+                var rolemapid =  myGuild.roles.cache.find(role => role.name === rolemap);
+                //console.log(channelName,channelReason);
+                msg.guild.channels.create(categoryName, { reason: channelReason,type: "category",permissionOverwrites: [
+                    {
+                        id: myGuild.id,
+                        deny: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: msg.author.id,
+                        allow: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: everyoneid,
+                        deny: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: botid,
+                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
+                    },
+                    {
+                        id: ()=>{if(rolemapid.id != null){return rolemapid.id;}else{return botid}} ,
+                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
+                    }
+                ],}).then(console.log("Success"))
+                .catch(console.error);
+                msg.reply("Category : "+channelName+"created with reason : "+channelReason);
+            }
+        }
+        else if (msg.content.startsWith("!givepermission") && msg.channel.name === "bot"){
+            if(msg.member.roles.cache.some(role => role.name === 'team')) {
+                var splitMsgContents = msg.content.split(" ");  // splitting command content
+                var channelName = splitMsgContents[1];// !givepermission channelname rolename 
+                var rolename = splitMsgContents[2];
+                var roleinfo =  myGuild.roles.cache.find(role => role.name === rolename);
+                var channelinfo = myGuild.channels.cache.find(channel => channel.name === channelName);
+                channelinfo.overwritePermissions([
+                    {
+                        id: roleinfo.id,
+                        allow: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: myGuild.id,
+                        deny: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: msg.author.id,
+                        allow: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: everyoneid,
+                        deny: ['VIEW_CHANNEL'],
+                    },
+                    {
+                        id: botid,
+                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
+                    },
+                ]).catch(console.err);
+                msg.reply("Channel : "+channelName+" Role : "+rolename+" are Binded");
+                //console.log(channelinfo.id+"g"+myGuild.id+"id"+roleinfo.id);//741252591932932117 + 741245483904663583
             }
         }
         else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
@@ -212,4 +321,9 @@ function SendMessageToChannel(message, channelID) {
 
 function returnScore(score,dbToUpdate){
     dbToUpdate.child("Score").set(score);
+}
+function test(){
+    // var perms = new Discord.Permissions(DEFAULT);
+    // console.log(perms);
+
 }
