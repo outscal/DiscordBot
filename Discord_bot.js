@@ -55,7 +55,7 @@ client.on('message', async msg => {
         //     var messagePoints = await Command.Points(msg.author.id);
         //     SendMessageToChannel(messagePoints,msg.channel.id);
         // } 
-        else if (msg.content == '!help') {
+        else if (msg.content == '!help' && msg.member.roles.cache.some(role => role.name === 'team')) {
             msg.reply(Command.Help());
         } 
         else if (msg.content == '!Leaderboardtest') {
