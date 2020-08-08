@@ -8,8 +8,8 @@ const { setupFirebase } = require('./Firebase/firebase');
 const StandupConfigData = require('./StandupConfigData');
 const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
 const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
-const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
-const { FLAGS } = require("discord.js/src/util/BitField");
+// const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
+// const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 
 dotenv.config();
@@ -28,8 +28,6 @@ client.on('ready', () => {
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
-    test();
-
 });
 
 client.on('message', async msg => {
@@ -104,25 +102,30 @@ client.on('message', async msg => {
             var msgContent = msg.content.toLowerCase();
             msgContent = msgContent.split(" ");
             var roleName = msgContent[1];
-            var channel = client.channels.cache.find((channel) => channel.name == roleName);
             var user = msg.author;
+
+            var userAccount = myGuild.members.cache.get(msg.author.id);
+            var existingBatch = userAccount.roles.cache.find(role => role.name.includes("batch"));
             var role = msg.guild.roles.cache.find((role) => role.name == roleName);
-            if (!(msg.member.roles.cache.first().name == roleName)) {
-              if(!channel){
-                  msg.channel.send("Invalid role name")   
-              }
-              else if (roleName && roleName.startsWith("batch") && channel) {
-                
+            var channel = client.channels.cache.find((channel) => channel.name == roleName);
+
+            if(existingBatch) { 
+                msg.channel.send("You are already part of an existing batch");
+            }
+            else if(!channel || !roleName){ 
+                msg.channel.send("Invalid role name/channel. Please check the command again.");
+            }
+            else if (roleName.startsWith("batch")) {
                 msg.member.roles.add(role);
+                msg.channel.send("Done! :100: :+1:");
                 msg.author.send(stringMessage.giveRoleDMmessage);
                 channel.send(`${user} Welcome to ${channel.name}`);
-              } else msg.channel.send("Role name should of format 'batch-xx-xx' ");
             } 
             else {
-              msg.channel.send("You are already assigned with role");
+              msg.channel.send("Something is wrong, please check the command");
             }
           }
-        else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {           
+        else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {
             if(msg.member.roles.cache.some(role => role.name === 'team')) {
                 //console.log("inside config");
                 var splitMsgContents = msg.content.split(" ");    // !configstandup activate(true) RoleName channelname time1,time2,time3 time format 00:00 24hr format    
@@ -344,9 +347,4 @@ function SendMessageToChannel(message, channelID) {
 
 function returnScore(score,dbToUpdate){
     dbToUpdate.child("Score").set(score);
-}
-function test(){
-    // var perms = new Discord.Permissions(DEFAULT);
-    // console.log(perms);
-
 }
