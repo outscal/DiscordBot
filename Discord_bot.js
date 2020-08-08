@@ -2,7 +2,7 @@ const standup = require("./StandUp/StandUp_bot");
 const Discord = require('discord.js');
 const Firebase = require('./Firebase/firebase.js');
 const Command = require('./Response/BotCammands.js');
-
+const stringMessage = require('./Strings/ServerStrings');
 const dotenv = require('dotenv');
 const { setupFirebase } = require('./Firebase/firebase');
 const StandupConfigData = require('./StandupConfigData');
@@ -97,6 +97,26 @@ client.on('message', async msg => {
                                 msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
                     }*/
                 }
+            }
+        }
+        else if (msg.content.startsWith("#giverole") && msg.channel.name === "bot"){
+            if(msg.member.roles.cache.array() == null){
+                var msgContent = msg.content.toLowerCase();
+                msgContent = msgContent.split(" ");
+                var roleName = msgContent[1];
+                var channel = client.channels.cache.find(channel=> channel.name == roleName);
+                var user = msg.author.name;
+                if(channelName.startsWith("batch") && channel){
+                    msg.member.roles.add(channelName);
+                    msg.author.send(stringMessage.giveRoleDMmessage)
+                    channel.send(`@${user}Welcome to ${channel.name}`)
+                }
+                else(
+                    msg.author.send("Role name should of format 'batch-xx-xx' ")
+                )
+            }
+            else{
+                msg.author.send("You are already assigned with role");
             }
         }
         else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {           
