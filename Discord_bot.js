@@ -10,6 +10,7 @@ const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
 const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
 const { FLAGS } = require("discord.js/src/util/BitField");
+const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 
 dotenv.config();
 
@@ -99,26 +100,28 @@ client.on('message', async msg => {
                 }
             }
         }
-        else if (msg.content.startsWith("#giverole") && msg.channel.name === "bot"){
-            if(msg.member.roles.cache.array() == null){
-                var msgContent = msg.content.toLowerCase();
-                msgContent = msgContent.split(" ");
-                var roleName = msgContent[1];
-                var channel = client.channels.cache.find(channel=> channel.name == roleName);
-                var user = msg.author.name;
-                if(channelName.startsWith("batch") && channel){
-                    msg.member.roles.add(channelName);
-                    msg.author.send(stringMessage.giveRoleDMmessage)
-                    channel.send(`@${user}Welcome to ${channel.name}`)
-                }
-                else(
-                    msg.author.send("Role name should of format 'batch-xx-xx' ")
-                )
+        else if (msg.content.startsWith("#giverole") && msg.channel.name === "bot") {
+            var msgContent = msg.content.toLowerCase();
+            msgContent = msgContent.split(" ");
+            var roleName = msgContent[1];
+            var channel = client.channels.cache.find((channel) => channel.name == roleName);
+            var user = msg.author;
+            var role = msg.guild.roles.cache.find((role) => role.name == roleName);
+            if (!(msg.member.roles.cache.first().name == roleName)) {
+              if(!channel){
+                  msg.channel.send("Invalid role name")   
+              }
+              else if (roleName && roleName.startsWith("batch") && channel) {
+                
+                msg.member.roles.add(role);
+                msg.author.send(stringMessage.giveRoleDMmessage);
+                channel.send(`${user} Welcome to ${channel.name}`);
+              } else msg.channel.send("Role name should of format 'batch-xx-xx' ");
+            } 
+            else {
+              msg.channel.send("You are already assigned with role");
             }
-            else{
-                msg.author.send("You are already assigned with role");
-            }
-        }
+          }
         else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {           
             if(msg.member.roles.cache.some(role => role.name === 'team')) {
                 //console.log("inside config");
