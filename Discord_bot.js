@@ -18,6 +18,7 @@ client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
   //standup.StandUpscheduler('15','20',['students'],client);
   standup.getDataAndSchdule(adminDatabase,client);
+  standup.leaderBoardScheduler()  // need to pass argument
   
   //generalChannel = client.channels.get(process.env.GENERAL_CHANNEL_ID);
 });

@@ -3,6 +3,8 @@ const { MessageEmbed } = require("discord.js");
 var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
+const leaderboardmodule = require("../LeaderBoard/LeaderBoard.js");
+const LeaderBoardStudentData = require("../LeaderBoard/LeaderBoardStudentData");
 
 function getDataAndSchdule(db, client) {
   var database = db.ref("/StandupConfig");
@@ -29,6 +31,14 @@ function getDataAndSchdule(db, client) {
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
           StandUpscheduler(channelName, hour, min, client);
         }
+        if (channel.val().StandupLeaderBoardTime) {
+          var time = channel.val().StandupMorningTime;
+          time = time.split(":");
+          hour = time[0];
+          min = time[1];
+          // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
+          leaderBoardScheduler(db,channel, hour, min, client);
+        }
       }
     });
   });
@@ -44,6 +54,9 @@ function StandUpscheduler(channelName, hour, min, client) {
 
 function startStandUp(channelName, client) {
   console.log("reminder for", channelName);
+  leaderboardmodule.InitLeaderBoardDatabase(adminDatabase); // leader board initilized
+  leaderboardmodule.MakeCopyOfLeaderBoard(); // made copy of last day
+
   const stantUpStartMessage = new MessageEmbed()
     // Set the title of the field
     .setTitle(`Reminder for Daily Standup`)
@@ -51,7 +64,7 @@ function startStandUp(channelName, client) {
     .setColor(0x16a085)
     // Set the main content of the embed
     .setDescription("start by command 'start'");
-  var serverID = "736892439868080130";
+  var serverID = "736892439868080130";                    // change the server ID here
   const myGuild = client.guilds.cache.get(serverID);
   myGuild.members.cache.map((user) => {
     if (user.roles.cache.first().name == channelName) {
@@ -132,7 +145,7 @@ function standUpCommands(message, client, db) {
 
                 //     message : All done! Congrats for maintaining a streak for X days!"
                 // }
-
+                saveToLeaderBoard(channel, student, db);
                 saveToDataBase(dialyStandUpDB, channel, student, answers); // saving the standup answers to db
               })
               .catch((collected) =>
@@ -147,6 +160,47 @@ function standUpCommands(message, client, db) {
         message.channel.send(`timeout start again with command "start"`)
       );
   }
+}
+
+
+function saveToLeaderBoard(channel, student, adminDatabase) {
+  leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+  studentData = new LeaderBoardStudentData();
+  studentData.ChannelId = channel.id;
+  studentData.StudentId = student.id;
+  studentData.Streak = 0; //leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
+  studentData.IsStreak = true;
+  studentData.Score = 0;
+  leaderboardmodule.setupLeaderBoardDB(studentData);
+  leaderboardmodule.CalculateScore(
+    studentData.ChannelId,
+    studentData.StudentId,
+    returnScore
+  );
+  leaderboardmodule.CreateLeaderBoardDBServer();
+  leaderboardmodule.GetPreviousDate();
+  var score= getScore(db,channel,student);
+  student.send(`All done! your current  score is ${score}`);
+
+}
+
+function getScore(DbReference,channel, student){
+  var date_ob = new Date();
+  var ChannelId = channel.id;
+  var studentid = student.id;
+  var presentYear = date_ob.getFullYear();
+  var presentMonth = date_ob.getMonth()+1;
+  var presentDay = date_ob.getDate();
+  var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+studentid);
+
+  presentStudentDb.on('value',gotData,errData);
+    function gotData(data){
+        var score = data.val().Score;
+        return (score);
+    }
+    function errData(error){
+        console.log(error);
+    }
 }
 
 function saveToDataBase(dialyStandUpDB, channel, student, answers) {
@@ -190,8 +244,56 @@ function get_Date() {
   return date;
 }
 
+function leaderBoardScheduler(db,channel, hour, min, client){ 
+  schedule.scheduleJob(`${min} ${hour} * * *`, function () {
+    // set time for standup more on https://www.npmjs.com/package/node-schedule
+    leaderboardResultMessage(db,channel,client);
+  });
+}
+
+function leaderboardResultMessage(DbReference,channel,client) {
+  var date_ob = new Date();
+  var ChannelId = channel.id;
+  var leaderBoardListArray=[];
+  var presentYear = date_ob.getFullYear();
+  var presentMonth = date_ob.getMonth()+1;
+  var presentDay = date_ob.getDate();
+  var presentChannelDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId);
+  presentChannelDb.on("value",function(channel){
+    channel.forEach(student=>{
+      let studentID = student.key;
+      let studentName = client.channels.cache.get(ChannelId).members.find(user=> user.id == studentID).name;
+      
+      let score = student.val();
+      leaderBoardListArray.push({studentName,score});
+    })
+  })
+
+  leaderBoardListArray.sort((a,b)=>(a.score >b.score) ? 1 : -1);
+
+  var listoftopTen = leaderBoardListArray.slice(0,10);
+
+  const leaderEmbed = new Discord.MessageEmbed()
+                  .setColor("#0099ff")
+                  .setTitle(`Course LEADERBOARD`)
+
+                  .addFields(
+                    listoftopTen.map((element,index)=>{
+                      return {name: `Rank is ${index+1}` , value: `${element.studentname} is at ${element.score}`}
+                    }
+                       )
+
+                    
+                  )
+
+                  .setTimestamp();
+  
+
+}
+
 module.exports = {
   StandUpscheduler,
   standUpCommands,
   getDataAndSchdule,
+  leaderBoardScheduler
 };
