@@ -53,7 +53,6 @@ var FindRoleMemberCount = async function FindRoleMemberCount(guild, roleName) {
     return 0;
 }
 
-
 var FindRole = async function FindRole(guild, roleName) { 
     guild.roles.fetch(true);
     var role = guild.roles.cache.find(role => role.name === roleName);

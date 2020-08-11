@@ -36,13 +36,13 @@ client.on('message', async msg => {
     } 
     // commands only team members can run 
     // TODO refactor to have all team commands in one module and community commands in a different module 
-    else if(msg.member.roles.cache.some(role => role.name === 'team')) {
+    else if(msg.content.startsWith("!") && msg.member.roles.cache.some(role => role.name === 'team')) {
         if (msg.content == '!help') {
             msg.reply(Command.Help());
         } 
         else if(msg.content.startsWith("!countmembers")) {
             // !countmembers rolename
-            var splitMsgContents = msg.content.split(" ");    
+            var splitMsgContents = msg.content.split(" ");
             var rolename = splitMsgContents[1];
             var count = await Command.FindRoleMemberCount(myGuild, rolename);
             msg.reply("Role members: " + count);
