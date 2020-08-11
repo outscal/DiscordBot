@@ -48,27 +48,28 @@ client.on('message', async msg => {
             msg.reply("Role members: " + count);
         }
         else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {
-                //console.log("inside config");
-                var splitMsgContents = msg.content.split(" ");    // !configstandup activate(true) RoleName channelname time1,time2,time3 time format 00:00 24hr format    
-                var isActivateConfig = splitMsgContents[1];
-                var resroleName = splitMsgContents[2];
-                var reschannelName = splitMsgContents[3];
-                var timeList = splitMsgContents[4];
-                var timesplit = timeList.split(",");
-                var channelinfo = myGuild.channels.cache.find(channel => channel.name === reschannelName);
-                var roleinfo = myGuild.roles.cache.find(role => role.name === resroleName);
-                standupData = new StandupConfigData(roleinfo.id,isActivateConfig,channelinfo.id,timesplit[0],timesplit[1],timesplit[2]);
-                var StandupConfigDB = adminDatabase.ref("/StandupConfig");
-                if(StandupConfigDB.child(resroleName) == resroleName){
-                    var dbchild = StandupConfigDB.child(resroleName); 
-                    dbchild.update({
-                        standupData
-                    });
-                }
-                else{
-                    var dbchild = StandupConfigDB.child(resroleName); 
-                    dbchild.set(standupData);
-                }              
+            //console.log("inside config");
+            var splitMsgContents = msg.content.split(" ");    // !configstandup activate(true) RoleName channelname time1,time2,time3 time format 00:00 24hr format    
+            var isActivateConfig = splitMsgContents[1];
+            var resroleName = splitMsgContents[2];
+            var reschannelName = splitMsgContents[3];
+            var timeList = splitMsgContents[4];
+            var timesplit = timeList.split(",");
+            var channelinfo = myGuild.channels.cache.find(channel => channel.name === reschannelName);
+            var roleinfo = myGuild.roles.cache.find(role => role.name === resroleName);
+            standupData = new StandupConfigData(roleinfo.id,isActivateConfig,channelinfo.id,timesplit[0],timesplit[1],timesplit[2]);
+            var StandupConfigDB = adminDatabase.ref("/StandupConfig");
+            if(StandupConfigDB.child(resroleName) == resroleName){
+                var dbchild = StandupConfigDB.child(resroleName); 
+                dbchild.update({
+                    standupData
+                });
+            }
+            else{
+                var dbchild = StandupConfigDB.child(resroleName); 
+                dbchild.set(standupData);
+            } 
+            standup.getDataAndSchdule(adminDatabase, client, myGuild);
         }
         else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) 
