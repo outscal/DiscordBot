@@ -1,6 +1,5 @@
 DatabaseSystem = require('../DatabaseSystem/SaveSystem');
 const Discord = require('discord.js');
-const GoogleSpreadSheet = require('google-spreadsheet');
 
 var LeaderBoard = function LeaderBoard() {
     return new Promise(async resolve => {
@@ -25,7 +24,7 @@ var Points = function Points(UID) {
 }
 
 var Help = function Help() {
-    return "here are some Commands You can Try \n* !help\n* !points\n* !leaderboard";
+    return "here are some Commands You can Try \n* !help\n* !showid\n* !points\n* !leaderboard \n ---------------------------- \n* Team only commands **Works only in Bot Channel under Team** - \n* !giverole discordId,discordId roleId \n* !configstandup activate(true) RoleName channelname time1,time2,time3 time (tip - format 00:00 24hr format) \n* !createrole rolename permissions,permission2 (morehelp - if you do not write permission default perms will be applied) \n* !createchannel channelname categoryName rolename reasontoCreateChannel \n* !createcategory categoryName rolename reasontoCreateCategory \n* !givepermission channelname rolename \n Rock the commands ";
 }
 
 var GiveRole = function GiveRole(message,userId,batchId) { 

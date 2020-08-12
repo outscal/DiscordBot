@@ -1,6 +1,7 @@
 class StandupConfigData{
-    constructor(roleId,channelId,standupMorningTime,standupEveningTime,standupLeaderBoardTime) {
+    constructor(roleId,isActive,channelId,standupMorningTime,standupEveningTime,standupLeaderBoardTime) {
         this.RoleId = roleId;
+        this.IsON = isActive;
         this.ChannelId = channelId;
         this.StandupMorningTime = standupMorningTime;
         this.StandupEveningTime = standupEveningTime;
@@ -8,4 +9,5 @@ class StandupConfigData{
     }
 }
 
-modules.exports = StandupConfigData
+
+module.exports = StandupConfigData
