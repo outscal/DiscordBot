@@ -30,7 +30,6 @@ client.on('ready', () => {
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
     test();
 
-});
 
 client.on('message', async msg => {
     if (msg.channel.type == "dm") {
