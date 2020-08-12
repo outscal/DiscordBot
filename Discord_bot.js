@@ -28,7 +28,9 @@ client.on('ready', () => {
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
+
 });
+
 
 client.on('message', async msg => {
     if (msg.channel.type == "dm") {
