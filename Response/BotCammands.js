@@ -44,6 +44,27 @@ var GiveRole = function GiveRole(message,userId,batchId) {
     });
 }
 
+var FindRoleMemberCount = async function FindRoleMemberCount(guild, roleName) { 
+    var role = await FindRole(guild, roleName);
+    if(role) { 
+        return role.members.size;
+    }
+
+    return 0;
+}
+
+var FindRole = async function FindRole(guild, roleName) { 
+    guild.roles.fetch(true);
+    var role = guild.roles.cache.find(role => role.name === roleName);
+    if(role) { 
+        // console.log("Role found: " + role.id + ", name: " + roleName);
+        return role;
+    } else {
+        console.log("Role not found: " + roleName);
+        return null;
+    }
+}
+
 function splitStr(str, seperator) { 
       
     // Function to split string 
@@ -56,5 +77,7 @@ module.exports = {
     LeaderBoard,
     Points,
     Help,
-    GiveRole
+    GiveRole,
+    FindRole,
+    FindRoleMemberCount
 }
