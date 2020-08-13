@@ -18,9 +18,9 @@ function getDataAndSchdule(db, client, guild) {
   database.on("value", function (snapShot) {
     snapShot.forEach((channel) => {
       if (channel.val().IsON) {  // checking for channel has active standup 
-        var channelName = channel.key;
         var resroleid = channel.val().RoleId;
         var reschannelid = channel.val().ChannelId;
+        var channelObject= guild.channels.cache.find(element=> element.id == reschannelid);
         //console.log(channelName);
         if (channel.val().StandupEveningTime) {
           var time = channel.val().StandupEveningTime;
@@ -41,12 +41,15 @@ function getDataAndSchdule(db, client, guild) {
 
         }
         if (channel.val().StandupLeaderBoardTime) {
-          var time = channel.val().StandupMorningTime;
+          var time = channel.val().StandupLeaderBoardTime;
           time = time.split(":");
           hour = time[0];
           min = time[1];
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
-          leaderBoardScheduler(db,channel, hour, min, client);
+          if(channelObject){  
+            leaderBoardScheduler(db,channelObject, hour, min, client);
+          }
+          
         }
       }
     });

@@ -107,7 +107,7 @@ var CreateLeaderBoardDBServer = function CreateLeaderBoardDBServer(){
     }
     
 }
-var CalculateScore = function CalculateScore(ChannelId,studentid,returnScore){
+ async function CalculateScore(ChannelId,studentid,returnScore){
 
     var presentYear = date_ob.getFullYear();
     var presentMonth = date_ob.getMonth()+1;
@@ -120,6 +120,7 @@ var CalculateScore = function CalculateScore(ChannelId,studentid,returnScore){
         prevStudentData = data.val().Score;
         //console.log(data.val().Score);
         returnScore(prevStudentData+1,presentStudentDb);
+        
     }
     function errData(error){
         console.log(error);
@@ -208,6 +209,7 @@ var GetLeaderBoard = function GetLeaderBoard(){
 
 // saving daily data to leadedBoard
 function saveToLeaderBoard(channel, student, adminDatabase) {
+    console.log("saveToLeaderBoard is called");
     InitLeaderBoardDatabase(adminDatabase);
     studentData = new LeaderBoardStudentData();
     studentData.ChannelId = channel.id;
@@ -220,17 +222,19 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
       studentData.ChannelId,
       studentData.StudentId,
       returnScore
-    );
+    )
+    setTimeout(() => {
+        SendScore(adminDatabase,channel,student);  
+    }, 1000);
+    
     CreateLeaderBoardDBServer();
     GetPreviousDate();
-    var score= getScore(db,channel,student);
-    student.send(`All done! your current  score is ${score}`);
-  
+    
   }
 
   // Get score from leaderBoard data Base
 
-  function getScore(DbReference,channel, student){
+  function SendScore(DbReference,channel, student){
     var date_ob = new Date();
     var ChannelId = channel.id;
     var studentid = student.id;
@@ -242,7 +246,8 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
     presentStudentDb.on('value',gotData,errData);
       function gotData(data){
           var score = data.val().Score;
-          return (score);
+          console.log("from get score ",score);
+          student.send(`Your current  score is ${score}`);
       }
       function errData(error){
           console.log(error);
@@ -252,18 +257,20 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
   // leader board scheduler 
 
   function leaderBoardScheduler(db,channel, hour, min, client){ 
+      console.log(hour,min)
     schedule.scheduleJob(`${min} ${hour} * * *`, function () {
-                                                                            // more on https://www.npmjs.com/package/node-schedule
+        console.log("called function")                                                                    // more on https://www.npmjs.com/package/node-schedule
       leaderboardResultMessage(db,channel,client);
     });
   }
 
   // Leard Board Result Message
 
-  function leaderboardResultMessage(DbReference,channel,client) {
-    var topListNumber = 10; // represent the number of top results to display
+  function leaderboardResultMessage(DbReference,channelObject,client) {
+      console.log("leaderboard reasult message called");
+    var topListNumber = 2; // represent the number of top results to display
     var date_ob = new Date();
-    var ChannelId = channel.id;
+    var ChannelId = channelObject.id;
     var leaderBoardListArray=[];
     var presentYear = date_ob.getFullYear();
     var presentMonth = date_ob.getMonth()+1;
@@ -272,32 +279,39 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
     presentChannelDb.on("value",function(channel){
       channel.forEach(student=>{
         let studentID = student.key;
-        let studentName = client.channels.cache.get(ChannelId).members.find(user=> user.id == studentID).name;
         
-        let score = student.val();
+        let studentName = client.users.cache.get(studentID).username
+        
+        let score = student.val().Score;
+        
         leaderBoardListArray.push({studentName,score});
+        
       })
+      leaderBoardListArray.sort((a,b)=>(a.score < b.score) ? 1 : -1);
+      
+      var listoftopStudents = leaderBoardListArray.slice(0,topListNumber);
+      
+        const leaderEmbed = new Discord.MessageEmbed()
+                        .setColor("#c0392b")
+                        .setTitle(`Course LEADERBOARD`)
+      
+                        .addFields(
+                            listoftopStudents.map((element,index)=>{
+                            return {name: `Rank ${index+1}` , value: `${element.studentName} is at score ${element.score}`}
+                          }
+                             )
+      
+                          
+                        )
+      
+                        .setTimestamp();
+                        console.log(leaderEmbed);
+                        channelObject.send(leaderEmbed);
     })
+    
+    
   
-    leaderBoardListArray.sort((a,b)=>(a.score >b.score) ? 1 : -1);
   
-    var listoftopTen = leaderBoardListArray.slice(0,topListNumber);
-  
-    const leaderEmbed = new Discord.MessageEmbed()
-                    .setColor("#0099ff")
-                    .setTitle(`Course LEADERBOARD`)
-  
-                    .addFields(
-                      listoftopTen.map((element,index)=>{
-                        return {name: `Rank is ${index+1}` , value: `${element.studentname} is at ${element.score}`}
-                      }
-                         )
-  
-                      
-                    )
-  
-                    .setTimestamp();
-    channel.send(leaderEmbed);
     
   
   }
@@ -317,7 +331,8 @@ module.exports = {
     MakeCopyOfLeaderBoard,
     CalculateStreak,
     leaderBoardScheduler,
-    saveToLeaderBoard
+    saveToLeaderBoard,
+    leaderboardResultMessage
 }
 
 

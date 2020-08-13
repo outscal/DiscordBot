@@ -12,13 +12,14 @@ const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 //const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 
+
 dotenv.config();
 
-const serverID = "536834108077113364"; // Outscal server id
+const serverID = "736892439868080130"; // Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
 var everyoneid = "736892439868080130";
-var botid = "683632492871417896";
+var botid = "736968069649530923";
 // main Outscal guild object - use this everywhere 
 var myGuild; 
 
