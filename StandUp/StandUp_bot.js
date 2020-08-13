@@ -142,8 +142,9 @@ function standUpCommands(message, client, guild, db) {
                 // }
                 // right now sending in generic confirmation message to the user 
                 message.channel.send(message4);
-                saveToLeaderBoard(destinationChannel, message.author, db);
+                
                 saveToDataBase(dialyStandUpDB, destinationChannel, message.author, answers); // saving the standup answers to db
+                saveToLeaderBoard(destinationChannel, message.author, db);
               })
               .catch((collected) => {
                 message.channel.send(messageTimeout);
@@ -187,12 +188,13 @@ function saveToDataBase(dialyStandUpDB, channel, student, answers) {
   }
 
   studentNode.update({ answers })
+  console.log("saved to daily satndup data base !");
 }
 
 function get_Date() {
   var D = new Date();
   let day = D.getDate().toString();
-  let month = D.getMonth().toString();
+  let month = (D.getMonth() +1).toString();
   let year = D.getFullYear().toString();
 
   let date = year + month + day;

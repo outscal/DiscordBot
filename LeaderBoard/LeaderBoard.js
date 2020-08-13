@@ -1,4 +1,5 @@
 const LeaderBoardStudentData = require("./LeaderBoardStudentData");
+
 var schedule = require("node-schedule");
 var moment = require('moment'); // used for date time calculations
 var PreviousDayChannelinfo = null; // holds the database for previous day leaderboard info 
@@ -207,21 +208,21 @@ var GetLeaderBoard = function GetLeaderBoard(){
 
 // saving daily data to leadedBoard
 function saveToLeaderBoard(channel, student, adminDatabase) {
-    leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+    InitLeaderBoardDatabase(adminDatabase);
     studentData = new LeaderBoardStudentData();
     studentData.ChannelId = channel.id;
     studentData.StudentId = student.id;
     studentData.Streak = 0; //leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
     studentData.IsStreak = true;
     studentData.Score = 0;
-    leaderboardmodule.setupLeaderBoardDB(studentData);
-    leaderboardmodule.CalculateScore(
+    setupLeaderBoardDB(studentData);
+    CalculateScore(
       studentData.ChannelId,
       studentData.StudentId,
       returnScore
     );
-    leaderboardmodule.CreateLeaderBoardDBServer();
-    leaderboardmodule.GetPreviousDate();
+    CreateLeaderBoardDBServer();
+    GetPreviousDate();
     var score= getScore(db,channel,student);
     student.send(`All done! your current  score is ${score}`);
   
@@ -301,6 +302,9 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
   
   }
 
+function returnScore(score,dbToUpdate){
+    dbToUpdate.child("Score").set(score);
+}
 
 
 module.exports = {

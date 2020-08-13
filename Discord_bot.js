@@ -342,9 +342,9 @@ function SendMessageToChannel(message, channelID) {
   client.channels.cache.get(channelID).send(message);
 }
 
-function returnScore(score,dbToUpdate){
-    dbToUpdate.child("Score").set(score);
-}
+// function returnScore(score,dbToUpdate){
+//     dbToUpdate.child("Score").set(score);
+// }
 function test(){
     // var perms = new Discord.Permissions(DEFAULT);
     // console.log(perms);
