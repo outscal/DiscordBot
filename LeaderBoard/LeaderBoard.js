@@ -1,5 +1,5 @@
 const LeaderBoardStudentData = require("./LeaderBoardStudentData");
-
+const Discord = require("discord.js");
 var schedule = require("node-schedule");
 var moment = require('moment'); // used for date time calculations
 var PreviousDayChannelinfo = null; // holds the database for previous day leaderboard info 

@@ -14,7 +14,7 @@ const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 
 dotenv.config();
 
-const serverID = "736892439868080130"; // Outscal server id
+const serverID = "536834108077113364"; // Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
 var everyoneid = "736892439868080130";
@@ -46,6 +46,9 @@ client.on('message', async msg => {
             var rolename = splitMsgContents[1];
             var count = await Command.FindRoleMemberCount(myGuild, rolename);
             msg.reply("Role members: " + count);
+        }else if(msg.content.startsWith("!test")) {
+            //leaderboard test
+            test();
         }
         else if (msg.content.startsWith("!configstandup") && msg.channel.name === "bot") {
             //console.log("inside config");
@@ -312,11 +315,25 @@ function SendMessageToChannel(message, channelID) {
   client.channels.cache.get(channelID).send(message);
 }
 
-// function returnScore(score,dbToUpdate){
-//     dbToUpdate.child("Score").set(score);
-// }
+function returnScore(score,dbToUpdate){
+    dbToUpdate.child("Score").set(score);
+}
 function test(){
     // var perms = new Discord.Permissions(DEFAULT);
     // console.log(perms);
+
+    leaderboardmodule.InitLeaderBoardDatabase(adminDatabase); //its firebase db reference
+    //leaderboardmodule.MakeCopyOfLeaderBoard();
+    studentData = new LeaderBoardStudentData();
+    studentData.ChannelId = "12";
+    studentData.StudentId = 30;
+    studentData.IsStreak = 0;
+    studentData.Streak = 0;
+    studentData.Score = 0;
+    //studentData.Score = leaderboardmodule.CalculateScore();
+    leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId,returnScore);
+    leaderboardmodule.setupLeaderBoardDB(studentData);
+    leaderboardmodule.CreateLeaderBoardDBServer();
+    //leaderboardmodule.GetPreviousDate();
 
 }
