@@ -3,7 +3,7 @@ const { MessageEmbed } = require("discord.js");
 var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
-
+const { saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
 const message1 = "What did you do today?";
 const message2 = "What are you planning on doing tomorrow?";
 const message3 = "Do you need any help?";
@@ -39,6 +39,14 @@ function getDataAndSchdule(db, client, guild) {
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
           StandUpscheduler(resroleid,reschannelid, hour, min, client, guild);
 
+        }
+        if (channel.val().StandupLeaderBoardTime) {
+          var time = channel.val().StandupMorningTime;
+          time = time.split(":");
+          hour = time[0];
+          min = time[1];
+          // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
+          leaderBoardScheduler(db,channel, hour, min, client);
         }
       }
     });
@@ -134,6 +142,7 @@ function standUpCommands(message, client, guild, db) {
                 // }
                 // right now sending in generic confirmation message to the user 
                 message.channel.send(message4);
+                saveToLeaderBoard(destinationChannel, message.author, db);
                 saveToDataBase(dialyStandUpDB, destinationChannel, message.author, answers); // saving the standup answers to db
               })
               .catch((collected) => {

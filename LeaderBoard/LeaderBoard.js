@@ -1,4 +1,5 @@
 const LeaderBoardStudentData = require("./LeaderBoardStudentData");
+var schedule = require("node-schedule");
 var moment = require('moment'); // used for date time calculations
 var PreviousDayChannelinfo = null; // holds the database for previous day leaderboard info 
 var DbReference = null;  // has the fire base refrence 
@@ -204,6 +205,104 @@ var GetLeaderBoard = function GetLeaderBoard(){
 // creates / updates server 
 
 
+// saving daily data to leadedBoard
+function saveToLeaderBoard(channel, student, adminDatabase) {
+    leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+    studentData = new LeaderBoardStudentData();
+    studentData.ChannelId = channel.id;
+    studentData.StudentId = student.id;
+    studentData.Streak = 0; //leaderboardmodule.CalculateStreak(studentData.ChannelId,studentData.StudentId);
+    studentData.IsStreak = true;
+    studentData.Score = 0;
+    leaderboardmodule.setupLeaderBoardDB(studentData);
+    leaderboardmodule.CalculateScore(
+      studentData.ChannelId,
+      studentData.StudentId,
+      returnScore
+    );
+    leaderboardmodule.CreateLeaderBoardDBServer();
+    leaderboardmodule.GetPreviousDate();
+    var score= getScore(db,channel,student);
+    student.send(`All done! your current  score is ${score}`);
+  
+  }
+
+  // Get score from leaderBoard data Base
+
+  function getScore(DbReference,channel, student){
+    var date_ob = new Date();
+    var ChannelId = channel.id;
+    var studentid = student.id;
+    var presentYear = date_ob.getFullYear();
+    var presentMonth = date_ob.getMonth()+1;
+    var presentDay = date_ob.getDate();
+    var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+studentid);
+  
+    presentStudentDb.on('value',gotData,errData);
+      function gotData(data){
+          var score = data.val().Score;
+          return (score);
+      }
+      function errData(error){
+          console.log(error);
+      }
+  }
+
+  // leader board scheduler 
+
+  function leaderBoardScheduler(db,channel, hour, min, client){ 
+    schedule.scheduleJob(`${min} ${hour} * * *`, function () {
+                                                                            // more on https://www.npmjs.com/package/node-schedule
+      leaderboardResultMessage(db,channel,client);
+    });
+  }
+
+  // Leard Board Result Message
+
+  function leaderboardResultMessage(DbReference,channel,client) {
+    var topListNumber = 10; // represent the number of top results to display
+    var date_ob = new Date();
+    var ChannelId = channel.id;
+    var leaderBoardListArray=[];
+    var presentYear = date_ob.getFullYear();
+    var presentMonth = date_ob.getMonth()+1;
+    var presentDay = date_ob.getDate();
+    var presentChannelDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId);
+    presentChannelDb.on("value",function(channel){
+      channel.forEach(student=>{
+        let studentID = student.key;
+        let studentName = client.channels.cache.get(ChannelId).members.find(user=> user.id == studentID).name;
+        
+        let score = student.val();
+        leaderBoardListArray.push({studentName,score});
+      })
+    })
+  
+    leaderBoardListArray.sort((a,b)=>(a.score >b.score) ? 1 : -1);
+  
+    var listoftopTen = leaderBoardListArray.slice(0,topListNumber);
+  
+    const leaderEmbed = new Discord.MessageEmbed()
+                    .setColor("#0099ff")
+                    .setTitle(`Course LEADERBOARD`)
+  
+                    .addFields(
+                      listoftopTen.map((element,index)=>{
+                        return {name: `Rank is ${index+1}` , value: `${element.studentname} is at ${element.score}`}
+                      }
+                         )
+  
+                      
+                    )
+  
+                    .setTimestamp();
+    channel.send(leaderEmbed);
+    
+  
+  }
+
+
+
 module.exports = {
     InitLeaderBoardDatabase,
     setupLeaderBoardDB,
@@ -213,6 +312,8 @@ module.exports = {
     InitDefaultLeaderBoard,
     MakeCopyOfLeaderBoard,
     CalculateStreak,
+    leaderBoardScheduler,
+    saveToLeaderBoard
 }
 
 

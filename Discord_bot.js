@@ -8,16 +8,16 @@ const { setupFirebase } = require('./Firebase/firebase');
 const StandupConfigData = require('./StandupConfigData');
 const leaderboardmodule = require('./LeaderBoard/LeaderBoard.js');
 const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
-const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
-const { FLAGS } = require("discord.js/src/util/BitField");
+//const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
+//const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 
 dotenv.config();
 
-const serverID = "536834108077113364"; // Outscal server id
+const serverID = "736892439868080130"; // Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
-var everyoneid = "536834108077113364";
+var everyoneid = "736892439868080130";
 var botid = "683632492871417896";
 // main Outscal guild object - use this everywhere 
 var myGuild; 
@@ -180,7 +180,7 @@ client.on('message', async msg => {
         else if (msg.content.startsWith("!createchannel") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) {
                 var splitMsgContents = msg.content.split(" ");  // splitting command content
-                var channelName = splitMsgContents[1];// !createchannel channelname categoryName rolemap reason
+                var channelName = splitMsgContents[1]; // !createchannel channelname categoryName rolemap reason
                 var categoryName = splitMsgContents[2];
                 var rolemap = splitMsgContents[3];
                 channelReason = splitMsgContents[4];
