@@ -4,7 +4,6 @@ var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
 const { saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
-const ScheduleData = require("./scheduleData")
 const message1 = "What did you do today?";
 const message2 = "What are you planning on doing tomorrow?";
 const message3 = "Do you need any help?";
