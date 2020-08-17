@@ -87,7 +87,7 @@ function startStandUp(resroleid,reschannelid, client, guild) {
     var batchRole = user.roles.cache.find(role => role.name.includes("batch"));//returns roleid which has name of batch in it 
     
     
-    if (batchRole === resroleid) {
+    if (batchRole == resroleid) {
        user.send(stantUpStartMessage).catch(console.error);
     }
     // if (user.roles.cache.first().name == channelinfo.id) 
