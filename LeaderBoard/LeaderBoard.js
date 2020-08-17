@@ -9,7 +9,7 @@ var yearLevel,monthLevel,dayLevel,channelLevel,studentLevel = null; // used to d
 let date_ob = new Date();  // gives code todays date 
 saveStudentData = new LeaderBoardStudentData; // stored studentdata to be used in one function
 //Dates 
-var prevMonth,prevDay ,prevYear,yesterday  = null;
+var prevMonth,prevDay,prevYear,yesterday  = null;
 var prevStudentData = 100;
 //always call this before using any function of this file
 var InitLeaderBoardDatabase = function InitLeaderBoardDatabase(sendAdminDB){
@@ -256,7 +256,10 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
 
   // leader board scheduler 
 
-  function leaderBoardScheduler(db,channel, hour, min, client){ 
+  function leaderBoardScheduler(db,channel, time, client){ 
+    time = time.split(":");
+    hour = time[0];
+    min = time[1];
       console.log(hour,min)
     schedule.scheduleJob(`${min} ${hour} * * *`, function () {
         console.log("called function")                                                                    // more on https://www.npmjs.com/package/node-schedule
@@ -268,7 +271,7 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
 
   function leaderboardResultMessage(DbReference,channelObject,client) {
       console.log("leaderboard reasult message called");
-    var topListNumber = 2; // represent the number of top results to display
+    var topListNumber = 3; // represent the number of top results to display
     var date_ob = new Date();
     var ChannelId = channelObject.id;
     var leaderBoardListArray=[];

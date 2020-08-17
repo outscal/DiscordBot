@@ -25,6 +25,7 @@ var myGuild;
 
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
+    
     console.log(`Logged in as ${client.user.tag}`);
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
@@ -73,7 +74,11 @@ client.on('message', async msg => {
                 var dbchild = StandupConfigDB.child(resroleName); 
                 dbchild.set(standupData);
             } 
-            standup.getDataAndSchdule(adminDatabase, client, myGuild);
+            
+            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[0],client,myGuild);
+            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[1],client,myGuild);
+            leaderboardmodule.leaderBoardScheduler(adminDatabase,channelinfo,timesplit[3],client);
+            //standup.getDataAndSchdule(adminDatabase, client, myGuild);
         }
         else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) 

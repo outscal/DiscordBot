@@ -4,6 +4,7 @@ var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
 const { saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
+const ScheduleData = require("./scheduleData")
 const message1 = "What did you do today?";
 const message2 = "What are you planning on doing tomorrow?";
 const message3 = "Do you need any help?";
@@ -13,41 +14,43 @@ const messageTimeout = `Timed out! Please start again using the "start" command`
 
 
 function getDataAndSchdule(db, client, guild) {
-
+  
   var database = db.ref("/StandupConfig");
-  database.on("value", function (snapShot) {
-    snapShot.forEach((channel) => {
+  database.once("value", function (snapShot) {
+    console.log("----------------------------");
+    snapShot.forEach((channel) =>{
       if (channel.val().IsON) {  // checking for channel has active standup 
         var resroleid = channel.val().RoleId;
         var reschannelid = channel.val().ChannelId;
         var channelObject= guild.channels.cache.find(element=> element.id == reschannelid);
-        //console.log(channelName);
-        if (channel.val().StandupEveningTime) {
+        
+        if (channel.val().StandupEveningTime){
           var time = channel.val().StandupEveningTime;
-          time = time.split(":");
-          hour = time[0];
-          min = time[1];
+          
           //console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
-          StandUpscheduler(resroleid,reschannelid, hour, min, client, guild);
+          if(channelObject){
+            StandUpscheduler(resroleid,reschannelid,channelObject,time, client, guild);
+          }
+          
+          
         }
 
         if (channel.val().StandupMorningTime) {
           var time = channel.val().StandupMorningTime;
-          time = time.split(":");
-          hour = time[0];
-          min = time[1];
-          // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
-          StandUpscheduler(resroleid,reschannelid, hour, min, client, guild);
-
+          if(channelObject){
+            StandUpscheduler(resroleid,reschannelid,channelObject,time,client, guild);
+          }
+        
+         
         }
         if (channel.val().StandupLeaderBoardTime) {
           var time = channel.val().StandupLeaderBoardTime;
-          time = time.split(":");
-          hour = time[0];
-          min = time[1];
+          
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
+        
           if(channelObject){  
-            leaderBoardScheduler(db,channelObject, hour, min, client);
+            var job =leaderBoardScheduler(db,channelObject,time,client);
+           
           }
           
         }
@@ -56,15 +59,24 @@ function getDataAndSchdule(db, client, guild) {
   });
 }
 
-function StandUpscheduler(resroleid,reschannelid, hour, min, client, guild) {
-  //console.log(`scheduled for channel: ${channelName} at ${hour}:${min}` )
-  schedule.scheduleJob(`${min} ${hour} * * *`, function () {
-    startStandUp(resroleid,reschannelid,client, guild);
-    // leader board copy logic here
-  });
+
+function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, guild) {
+  time = time.split(":");
+  hour = time[0];
+  min = time[1];
+  console.log(`scheduled for channel: ${channelObject.name} at ${hour}:${min}` )
+  var j = schedule.scheduleJob(`${min} ${hour} * * *`, function () {
+      startStandUp(resroleid,reschannelid,client, guild);
+    
+    });
+   console.log("Data returened by scheduler",j.nextInvocation());
+  
 }
 
+
+
 function startStandUp(resroleid,reschannelid, client, guild) {
+  console.log("start standup called")
   //console.log("reminder for", reschannelid);
   const stantUpStartMessage = new MessageEmbed()
     .setTitle(`Reminder for Daily Standup`)
@@ -74,7 +86,9 @@ function startStandUp(resroleid,reschannelid, client, guild) {
   // const myGuild = client.guilds.cache.get(serverID); 
   guild.members.cache.map((user) => { 
     var batchRole = user.roles.cache.find(role => role.name.includes("batch"));//returns roleid which has name of batch in it 
-    if (batchRole == resroleid) {
+    
+    
+    if (batchRole === resroleid) {
        user.send(stantUpStartMessage).catch(console.error);
     }
     // if (user.roles.cache.first().name == channelinfo.id) 
@@ -209,4 +223,5 @@ module.exports = {
   StandUpscheduler,
   standUpCommands,
   getDataAndSchdule,
+
 };
