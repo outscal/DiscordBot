@@ -92,6 +92,7 @@ var setupLeaderBoardDB = function setupLeaderBoardDB(studentData){
         dayLevel = monthLevel.child(date_ob.getDate());
         channelLevel = dayLevel.child(studentData.ChannelId);
         studentLevel = channelLevel.child(studentData.StudentId);
+        console.log("Leaderboard setup Successful");
     }
 }
 var CreateLeaderBoardDBServer = function CreateLeaderBoardDBServer(){
@@ -114,13 +115,13 @@ var CreateLeaderBoardDBServer = function CreateLeaderBoardDBServer(){
     var presentDay = date_ob.getDate();
     var prevDayDb = DbReference.ref("/LeaderBoard/"+prevYear+"/"+prevMonth+"/"+prevDay+"/"+ChannelId+"/"+studentid);
     var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+studentid);
-
-    prevDayDb.on('value',gotData,errData);
+    //console.log("cal score : /n");
+    prevDayDb.once('value',gotData,errData);
     function gotData(data){
-        prevStudentData = data.val().Score;
+        //console.log("in got data");
+        try{prevStudentData = data.val().Score;}catch{return;}        
         //console.log(data.val().Score);
-        returnScore(prevStudentData+1,presentStudentDb);
-        
+        returnScore(prevStudentData+1,presentStudentDb);        
     }
     function errData(error){
         console.log(error);
@@ -218,6 +219,8 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
     studentData.IsStreak = true;
     studentData.Score = 0;
     setupLeaderBoardDB(studentData);
+    CreateLeaderBoardDBServer();
+    console.log("before calculate score"); 
     CalculateScore(
       studentData.ChannelId,
       studentData.StudentId,
@@ -225,16 +228,13 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
     )
     setTimeout(() => {
         SendScore(adminDatabase,channel,student);  
-    }, 1000);
-    
-    CreateLeaderBoardDBServer();
-    GetPreviousDate();
-    
+    }, 1000);   
   }
 
   // Get score from leaderBoard data Base
 
-  function SendScore(DbReference,channel, student){
+function SendScore(DbReference,channel, student){
+    console.log("isnide send Score");
     var date_ob = new Date();
     var ChannelId = channel.id;
     var studentid = student.id;
@@ -242,11 +242,11 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
     var presentMonth = date_ob.getMonth()+1;
     var presentDay = date_ob.getDate();
     var presentStudentDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId+"/"+studentid);
-  
-    presentStudentDb.on('value',gotData,errData);
+    var score = -1;
+    presentStudentDb.once('value',gotData,errData);
       function gotData(data){
-          var score = data.val().Score;
-          console.log("from get score ",score);
+          score = data.val().Score;
+          console.log("from fb get score ",score);
           student.send(`Your current  score is ${score}`);
       }
       function errData(error){

@@ -4,14 +4,16 @@ var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
 const { saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
+const StandupScheduleData = require("./StandupScheduleData");
 const message1 = "What did you do today?";
 const message2 = "What are you planning on doing tomorrow?";
-const message3 = "Do you need any help?";
+const message3 = "Do you need any help? yes/no ?";
 const message4 = "Thanks for submitting your update!";
 const messageTimeout = `Timed out! Please start again using the "start" command`;
-
-
-
+var standupSchedules = [];
+const morningTime = "StandupMorningTime";
+const eveningTime = "StandupEveningTime";
+const leaderBoardTime = "StandupLeaderBoardTime";
 function getDataAndSchdule(db, client, guild) {
   
   var database = db.ref("/StandupConfig");
@@ -28,7 +30,7 @@ function getDataAndSchdule(db, client, guild) {
           
           //console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
           if(channelObject){
-            StandUpscheduler(resroleid,reschannelid,channelObject,time, client, guild);
+            StandUpscheduler(resroleid,reschannelid,channelObject,time, client, guild,eveningTime);
           }
           
           
@@ -37,7 +39,7 @@ function getDataAndSchdule(db, client, guild) {
         if (channel.val().StandupMorningTime) {
           var time = channel.val().StandupMorningTime;
           if(channelObject){
-            StandUpscheduler(resroleid,reschannelid,channelObject,time,client, guild);
+            StandUpscheduler(resroleid,reschannelid,channelObject,time,client, guild,morningTime);
           }
         
          
@@ -48,8 +50,8 @@ function getDataAndSchdule(db, client, guild) {
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
         
           if(channelObject){  
-            var job =leaderBoardScheduler(db,channelObject,time,client);
-           
+            var job =leaderBoardScheduler(db,channelObject,time,client/*,leaderboardTime*/);
+            //need to make a standuparray to hold data of all jobs 
           }
           
         }
@@ -59,19 +61,34 @@ function getDataAndSchdule(db, client, guild) {
 }
 
 
-function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, guild) {
+function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, guild,scheduleTime) {
   time = time.split(":");
   hour = time[0];
   min = time[1];
-  console.log(`scheduled for channel: ${channelObject.name} at ${hour}:${min}` )
-  var j = schedule.scheduleJob(`${min} ${hour} * * *`, function () {
+  //console.log(`scheduleduling for channel: ${channelObject.name} at ${hour}:${min}` );
+  var scheduleAlreadyExist = standupSchedules.find(myschedule=>myschedule.ChannelId == reschannelid && myschedule.ScheduleTime == scheduleTime);
+  if(scheduleAlreadyExist == "null"|| scheduleAlreadyExist == undefined || scheduleAlreadyExist ==null)
+  {
+    console.log("inside new schedulings");
+    var schedulerjob = schedule.scheduleJob(`${min} ${hour} * * *`, function () {
       startStandUp(resroleid,reschannelid,client, guild);
     
     });
-   console.log("Data returened by scheduler",j.nextInvocation());
-  
+    standupScheduleData = new StandupScheduleData();
+    standupScheduleData.ChannelId = reschannelid;
+    standupScheduleData.ScheduleJobObject = schedulerjob;
+    standupScheduleData.ScheduleTime = scheduleTime;
+    standupSchedules.push(standupScheduleData);
+    console.log("Data returened by scheduler",schedulerjob.nextInvocation());
+  }
+  else{
+    console.log("need to reschedule");
+    //find schedule from the array as we alrady have 
+    scheduleAlreadyExist.ScheduleJobObject.reschedule(`${min} ${hour} * * *`, function () {
+      startStandUp(resroleid,reschannelid,client, guild);
+    });
+  }
 }
-
 
 
 function startStandUp(resroleid,reschannelid, client, guild) {
@@ -130,10 +147,13 @@ function standUpCommands(message, client, guild, db) {
             message.channel
               .awaitMessages(filter, { max: 1, time: 60000, errors: ["time"] })
               .then((collected) => {
+
                 answers.problem = collected.first().content;
                 var user = guild.members.cache.get(message.author.id);
                 var batchRole = user.roles.cache.find(role => role.name.includes("batch"));
                 console.log("BatchRole: " + batchRole.name);
+                //var userinfo = guild.members.cache.find(uid => uid.id === message.author.id);
+
 
                 var destinationChannel = guild.channels.cache.find(channel => channel.name === batchRole.name);
                 console.log("Channel: " + destinationChannel.name);
@@ -150,15 +170,17 @@ function standUpCommands(message, client, guild, db) {
                     { name: message3, value: answers.problem }]
                   )
                   .setTimestamp();
-                destinationChannel.send(updateEmbed);
+                destinationChannel.send("<@"+user+">"+/*"Server name :"+user.nickname+*/" Standup Status : Your Standup is Updated");
 
                 // call the leaderboard function here with arg(channel,student){
                 //     inside this calculate the LeaderBoard score and put on dm 
                 //     message : All done! Congrats for maintaining a streak for X days!"
                 // }
                 // right now sending in generic confirmation message to the user 
-                message.channel.send(message4);
-                
+                message.channel.send(updateEmbed);
+                if(answers.problem == "yes"){
+                  message.channel.send("Please ask the question you are facing problem with in community channel & tag Teching Assistant role for help");
+                }
                 saveToDataBase(dialyStandUpDB, destinationChannel, message.author, answers); // saving the standup answers to db
                 saveToLeaderBoard(destinationChannel, message.author, db);
               })

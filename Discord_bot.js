@@ -15,11 +15,13 @@ const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 
 dotenv.config();
 
-const serverID = "736892439868080130"; // Outscal server id
+const serverID = "536834108077113364"; // remember to change to Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
 var everyoneid = "736892439868080130";
 var botid = "736968069649530923";
+const morningTime = "StandupMorningTime";
+const eveningTime = "StandupEveningTime";
 // main Outscal guild object - use this everywhere 
 var myGuild; 
 
@@ -73,11 +75,10 @@ client.on('message', async msg => {
             else{
                 var dbchild = StandupConfigDB.child(resroleName); 
                 dbchild.set(standupData);
-            } 
-            
-            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[0],client,myGuild);
-            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[1],client,myGuild);
-            leaderboardmodule.leaderBoardScheduler(adminDatabase,channelinfo,timesplit[3],client);
+            }
+            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[0],client,myGuild,morningTime);
+            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[1],client,myGuild,eveningTime);
+            leaderboardmodule.leaderBoardScheduler(adminDatabase,channelinfo,timesplit[2],client);
             //standup.getDataAndSchdule(adminDatabase, client, myGuild);
         }
         else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
