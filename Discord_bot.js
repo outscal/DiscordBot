@@ -11,6 +11,7 @@ const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 //const { ALL, DEFAULT } = require("discord.js/src/util/Permissions");
 //const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
+const { returnTimeInIST } = require("./LeaderBoard/LeaderBoard.js");
 
 
 dotenv.config();
@@ -32,6 +33,7 @@ client.on('ready', () => {
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
+    returnTimeInIST('12:15');
 });
 
 client.on('message', async msg => {

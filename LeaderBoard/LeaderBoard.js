@@ -2,6 +2,7 @@ const LeaderBoardStudentData = require("./LeaderBoardStudentData");
 const Discord = require("discord.js");
 var schedule = require("node-schedule");
 var moment = require('moment'); // used for date time calculations
+const StandupScheduleData = require("../StandUp/StandupScheduleData");
 var PreviousDayChannelinfo = null; // holds the database for previous day leaderboard info 
 var DbReference = null;  // has the fire base refrence 
 var LeaderBoardDb = null; // refernce to leader board db 
@@ -11,6 +12,7 @@ saveStudentData = new LeaderBoardStudentData; // stored studentdata to be used i
 //Dates 
 var prevMonth,prevDay,prevYear,yesterday  = null;
 var prevStudentData = 100;
+var LeaderBoardSchedules = [];
 //always call this before using any function of this file
 var InitLeaderBoardDatabase = function InitLeaderBoardDatabase(sendAdminDB){
     DbReference = sendAdminDB;
@@ -234,7 +236,7 @@ function saveToLeaderBoard(channel, student, adminDatabase) {
   // Get score from leaderBoard data Base
 
 function SendScore(DbReference,channel, student){
-    console.log("isnide send Score");
+    console.log("inside send Score");
     var date_ob = new Date();
     var ChannelId = channel.id;
     var studentid = student.id;
@@ -248,6 +250,7 @@ function SendScore(DbReference,channel, student){
           score = data.val().Score;
           console.log("from fb get score ",score);
           student.send(`Your current  score is ${score}`);
+          channel.send("<@"+studentid+">"+`Your current  score is ${score}`);
       }
       function errData(error){
           console.log(error);
@@ -257,14 +260,36 @@ function SendScore(DbReference,channel, student){
   // leader board scheduler 
 
   function leaderBoardScheduler(db,channel, time, client){ 
-    time = time.split(":");
-    hour = time[0];
-    min = time[1];
-      console.log(hour,min)
-    schedule.scheduleJob(`${min} ${hour} * * *`, function () {
-        console.log("called function")                                                                    // more on https://www.npmjs.com/package/node-schedule
-      leaderboardResultMessage(db,channel,client);
-    });
+    // time = time.split(":");
+    // hour = time[0];
+    // min = time[1];
+    var timeInIST =  returnTimeInIST(time);
+    mytime = timeInIST.split(":");//was time.split
+    hour = mytime[0];
+    min = mytime[1];
+    console.log("inside leaderboard "+hour,min);
+    var scheduleAlreadyExist = LeaderBoardSchedules.find(myschedule=>myschedule.ChannelId == channel.id);
+    if(scheduleAlreadyExist == "null"|| scheduleAlreadyExist == undefined || scheduleAlreadyExist ==null)
+    {
+      console.log("inside Leaderboard schedulings");
+      var schedulerjob = schedule.scheduleJob(`${min} ${hour} * * *`, function () {
+        leaderboardResultMessage(db,channel,client);
+      });
+      standupScheduleData = new StandupScheduleData();
+      standupScheduleData.ChannelId = channel.id;
+      standupScheduleData.ScheduleJobObject = schedulerjob;
+      standupScheduleData.ScheduleTime = "StandupLeaderBoardTime";
+      LeaderBoardSchedules.push(standupScheduleData);
+      console.log("Data returned by scheduler",schedulerjob.nextInvocation());
+    }
+    else{
+      console.log("need to reschedule");
+      //find schedule from the array as we alrady have 
+      scheduleAlreadyExist.ScheduleJobObject.reschedule(`${min} ${hour} * * *`,'Asia/Kolkata', function () {
+        leaderboardResultMessage(db,channel,client);
+      });
+      console.log("rescheduled");
+    }
   }
 
   // Leard Board Result Message
@@ -323,6 +348,51 @@ function returnScore(score,dbToUpdate){
     dbToUpdate.child("Score").set(score);
 }
 
+var returnTimeInIST = function returnTimeInIST(timeToConvert){
+    // var TimeDelta = moment('04:30', 'HH:mm');
+    // console.log(TimeDelta);
+    // var timeConvert = moment(timeToConvert,'HH:mm');
+    // var hour = timeConvert.diff(TimeDelta, 'hours', false);
+    // console.log(hour);
+    // var min = timeConvert.diff(TimeDelta, 'minutes', false);
+    // var convertedTime = hour+":"+min;
+    var timesplit = timeToConvert.split(":");
+    var givenhour = parseInt(timesplit[0]);
+    var givenmin = parseInt(timesplit[1]);
+    var hoursToSub = 4; // as server on ireland so IST is 4hr IST
+    var minToSub = 30;// as server on ireland so IST is  30 min behind IST
+    var reshours,resmin;
+    resmin = givenmin - minToSub;
+    if(resmin <0){
+        reshours = givenhour - 1;
+        resmin = 60+resmin; // as res min -ve so its actucally 60 +(- resmin)
+        if(reshours < 0){
+            reshours = 24 - hoursToSub ;
+        }
+        else
+        {
+            reshours = reshours - hoursToSub;
+        }
+    }
+    else{
+        reshours = givenhour - hoursToSub;
+        if(reshours <0){
+            reshours = 24 - givenhour;
+        }
+    }
+    if(reshours == 24){
+        reshours = 00;
+    }
+    if(reshours < 10){
+        reshours = "0"+reshours;
+    }
+    if(resmin <10){
+        resmin = "0"+resmin;
+    }
+    var convertedTime = reshours+":"+resmin;
+    return convertedTime;
+}
+
 
 module.exports = {
     InitLeaderBoardDatabase,
@@ -335,7 +405,8 @@ module.exports = {
     CalculateStreak,
     leaderBoardScheduler,
     saveToLeaderBoard,
-    leaderboardResultMessage
+    leaderboardResultMessage,
+    returnTimeInIST
 }
 
 

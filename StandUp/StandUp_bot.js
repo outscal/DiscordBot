@@ -3,7 +3,7 @@ const { MessageEmbed } = require("discord.js");
 var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
-const { saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
+const { returnTimeInIST,saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
 const StandupScheduleData = require("./StandupScheduleData");
 const message1 = "What did you do today?";
 const message2 = "What are you planning on doing tomorrow?";
@@ -35,7 +35,6 @@ function getDataAndSchdule(db, client, guild) {
           
           
         }
-
         if (channel.val().StandupMorningTime) {
           var time = channel.val().StandupMorningTime;
           if(channelObject){
@@ -49,8 +48,8 @@ function getDataAndSchdule(db, client, guild) {
           
           // console.log(`send reminder for ${channelName} at ${hour} : ${min}`);
         
-          if(channelObject){  
-            var job =leaderBoardScheduler(db,channelObject,time,client/*,leaderboardTime*/);
+          if(channelObject){
+            leaderBoardScheduler(db,channelObject,time,client/*,leaderboardTime*/);
             //need to make a standuparray to hold data of all jobs 
           }
           
@@ -61,10 +60,11 @@ function getDataAndSchdule(db, client, guild) {
 }
 
 
-function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, guild,scheduleTime) {
-  time = time.split(":");
-  hour = time[0];
-  min = time[1];
+function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, guild,scheduleTime) { 
+  var timeInIST =  returnTimeInIST(time);
+  mytime = timeInIST.split(":");//was time.split
+  hour = mytime[0];
+  min = mytime[1];
   //console.log(`scheduleduling for channel: ${channelObject.name} at ${hour}:${min}` );
   var scheduleAlreadyExist = standupSchedules.find(myschedule=>myschedule.ChannelId == reschannelid && myschedule.ScheduleTime == scheduleTime);
   if(scheduleAlreadyExist == "null"|| scheduleAlreadyExist == undefined || scheduleAlreadyExist ==null)
@@ -84,9 +84,10 @@ function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, gu
   else{
     console.log("need to reschedule");
     //find schedule from the array as we alrady have 
-    scheduleAlreadyExist.ScheduleJobObject.reschedule(`${min} ${hour} * * *`, function () {
+    scheduleAlreadyExist.ScheduleJobObject.reschedule(`${min} ${hour} * * *`/*,'Asia/Kolkata'*/, function () {
       startStandUp(resroleid,reschannelid,client, guild);
     });
+    console.log("rescheduled");
   }
 }
 
@@ -179,7 +180,7 @@ function standUpCommands(message, client, guild, db) {
                 // right now sending in generic confirmation message to the user 
                 message.channel.send(updateEmbed);
                 if(answers.problem == "yes"){
-                  message.channel.send("Please ask the question you are facing problem with in community channel & tag Teching Assistant role for help");
+                  destinationChannel.send("<@"+user+">"+" Please ask the question you are facing problem with in community channel");
                 }
                 saveToDataBase(dialyStandUpDB, destinationChannel, message.author, answers); // saving the standup answers to db
                 saveToLeaderBoard(destinationChannel, message.author, db);
