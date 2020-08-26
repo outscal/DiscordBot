@@ -34,11 +34,14 @@ client.on('ready', () => {
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
     returnTimeInIST('12:15');
+    
+    //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 
 client.on('message', async msg => {
     if (msg.channel.type == "dm") {
         standup.standUpCommands(msg, client, myGuild, adminDatabase);
+        
     } 
     // commands only team members can run 
     // TODO refactor to have all team commands in one module and community commands in a different module 

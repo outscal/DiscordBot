@@ -298,7 +298,7 @@ function SendScore(DbReference,channel, student){
       console.log("leaderboard reasult message called");
     var topListNumber = 3; // represent the number of top results to display
     var date_ob = new Date();
-    var ChannelId = channelObject.id;
+    var ChannelId = "740929075383631953";
     var leaderBoardListArray=[];
     var presentYear = date_ob.getFullYear();
     var presentMonth = date_ob.getMonth()+1;
@@ -317,6 +317,10 @@ function SendScore(DbReference,channel, student){
       })
       leaderBoardListArray.sort((a,b)=>(a.score < b.score) ? 1 : -1);
       
+      if(leaderBoardListArray.length < topListNumber){
+          topListNumber= leaderBoardListArray.length;
+      }
+
       var listoftopStudents = leaderBoardListArray.slice(0,topListNumber);
       
         const leaderEmbed = new Discord.MessageEmbed()
@@ -334,6 +338,7 @@ function SendScore(DbReference,channel, student){
       
                         .setTimestamp();
                         console.log(leaderEmbed);
+                        //let channelObject= client.channels.cache.get("736816357911560273");
                         channelObject.send(leaderEmbed);
     })
     
