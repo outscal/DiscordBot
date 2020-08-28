@@ -34,7 +34,6 @@ client.on('ready', () => {
     console.log("Myguild id: " + myGuild.id);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
     returnTimeInIST('12:15');
-    
     //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 

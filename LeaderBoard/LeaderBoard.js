@@ -298,11 +298,11 @@ function SendScore(DbReference,channel, student){
       console.log("leaderboard reasult message called");
     var topListNumber = 3; // represent the number of top results to display
     var date_ob = new Date();
-    var ChannelId = "740929075383631953";
+    var ChannelId = channelObject.id;
     var leaderBoardListArray=[];
     var presentYear = date_ob.getFullYear();
     var presentMonth = date_ob.getMonth()+1;
-    var presentDay = date_ob.getDate();
+    var presentDay =date_ob.getDate();
     var presentChannelDb = DbReference.ref("/LeaderBoard/"+presentYear+"/"+presentMonth+"/"+presentDay+"/"+ChannelId);
     presentChannelDb.on("value",function(channel){
       channel.forEach(student=>{
@@ -317,9 +317,9 @@ function SendScore(DbReference,channel, student){
       })
       leaderBoardListArray.sort((a,b)=>(a.score < b.score) ? 1 : -1);
       
-      if(leaderBoardListArray.length < topListNumber){
-          topListNumber= leaderBoardListArray.length;
-      }
+    //   if(leaderBoardListArray.length < topListNumber){
+    //       topListNumber= leaderBoardListArray.length;
+    //   }
 
       var listoftopStudents = leaderBoardListArray.slice(0,topListNumber);
       
@@ -338,7 +338,7 @@ function SendScore(DbReference,channel, student){
       
                         .setTimestamp();
                         console.log(leaderEmbed);
-                        //let channelObject= client.channels.cache.get("736816357911560273");
+                       // let channelObject= client.channels.cache.get("736816357911560273");
                         channelObject.send(leaderEmbed);
     })
     

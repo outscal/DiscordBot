@@ -226,7 +226,10 @@ function saveToDataBase(dialyStandUpDB, channel, student, answers) {
       studentNode = channelNode.child(studentID);
   }
 
-  studentNode.update({ answers })
+  channelNode.child(studentID).update({"q1": answers.did,
+                                      "q2":answers.plan,
+                                    "q3":answers.problem})
+  //studentNode.update({ answers })
   console.log("saved to daily satndup data base !");
 }
 
