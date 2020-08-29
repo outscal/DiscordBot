@@ -215,13 +215,13 @@ function saveToDataBase(dialyStandUpDB, channel, student, answers) {
       dailyStandUp= dialyStandUpDB.child(date)
   }
   var channelNode = dailyStandUp.child(channelID);
-  if(channelNode.key != channelNode){
+  if(channelNode.key != channelID){
       dailyStandUp.set(channelID);
       channelNode = dailyStandUp.child(channelID);
   }
 
   var studentNode = channelNode.child(studentID);
-  if(studentNode.key != studentNode){
+  if(studentNode.key != studentID){
       channelNode.set(studentID);
       studentNode = channelNode.child(studentID);
   }

@@ -19,7 +19,7 @@ dotenv.config();
 const serverID = "536834108077113364"; // remember to change to Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
-var everyoneid = "736892439868080130";
+var everyoneid = "536834108077113364";
 var botid = "736968069649530923";
 const morningTime = "StandupMorningTime";
 const eveningTime = "StandupEveningTime";
