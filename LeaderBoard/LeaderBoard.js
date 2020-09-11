@@ -94,7 +94,7 @@ var setupLeaderBoardDB = function setupLeaderBoardDB(studentData){
         dayLevel = monthLevel.child(date_ob.getDate());
         channelLevel = dayLevel.child(studentData.ChannelId);
         studentLevel = channelLevel.child(studentData.StudentId);
-        console.log("Leaderboard setup Successful");
+        //console.log("Leaderboard setup Successful");
     }
 }
 var CreateLeaderBoardDBServer = function CreateLeaderBoardDBServer(){
@@ -267,7 +267,7 @@ function SendScore(DbReference,channel, student){
     mytime = timeInIST.split(":");//was time.split
     hour = mytime[0];
     min = mytime[1];
-    console.log("inside leaderboard "+hour,min);
+    console.log("inside leaderboard "+hour+":"+min);
     var scheduleAlreadyExist = LeaderBoardSchedules.find(myschedule=>myschedule.ChannelId == channel.id);
     if(scheduleAlreadyExist == "null"|| scheduleAlreadyExist == undefined || scheduleAlreadyExist ==null)
     {
@@ -280,10 +280,11 @@ function SendScore(DbReference,channel, student){
       standupScheduleData.ScheduleJobObject = schedulerjob;
       standupScheduleData.ScheduleTime = "StandupLeaderBoardTime";
       LeaderBoardSchedules.push(standupScheduleData);
-      console.log("Data returned by scheduler",schedulerjob.nextInvocation());
+      //console.log("Data returned by scheduler",schedulerjob.nextInvocation());
     }
     else{
       console.log("need to reschedule");
+      //console.log("inside leaderboard reschedule "+hour+":"+min);
       //find schedule from the array as we alrady have 
       scheduleAlreadyExist.ScheduleJobObject.reschedule(`${min} ${hour} * * *`,'Asia/Kolkata', function () {
         leaderboardResultMessage(db,channel,client);
@@ -316,13 +317,13 @@ function SendScore(DbReference,channel, student){
         
       })
       leaderBoardListArray.sort((a,b)=>(a.score < b.score) ? 1 : -1);
-      
+      console.log("List array "+leaderBoardListArray);
     //   if(leaderBoardListArray.length < topListNumber){
     //       topListNumber= leaderBoardListArray.length;
     //   }
 
       var listoftopStudents = leaderBoardListArray.slice(0,topListNumber);
-      
+      console.log("top studs "+listoftopStudents);
         const leaderEmbed = new Discord.MessageEmbed()
                         .setColor("#c0392b")
                         .setTitle(`Course LEADERBOARD`)

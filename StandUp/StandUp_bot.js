@@ -3,7 +3,7 @@ const { MessageEmbed } = require("discord.js");
 var schedule = require("node-schedule");
 const { database } = require("firebase-admin");
 const { LeaderBoard } = require("../Response/BotCammands");
-const { returnTimeInIST,saveToLeaderBoard , leaderBoardScheduler } =  require("../LeaderBoard/LeaderBoard");
+const { returnTimeInIST,saveToLeaderBoard , leaderBoardScheduler ,MakeCopyOfLeaderBoard} =  require("../LeaderBoard/LeaderBoard");
 const StandupScheduleData = require("./StandupScheduleData");
 const message1 = "What did you do today?";
 const message2 = "What are you planning on doing tomorrow?";
@@ -15,7 +15,6 @@ const morningTime = "StandupMorningTime";
 const eveningTime = "StandupEveningTime";
 const leaderBoardTime = "StandupLeaderBoardTime";
 function getDataAndSchdule(db, client, guild) {
-  
   var database = db.ref("/StandupConfig");
   database.once("value", function (snapShot) {
     console.log("----------------------------");
@@ -72,7 +71,7 @@ function StandUpscheduler(resroleid,reschannelid,channelObject, time, client, gu
     console.log("inside new schedulings");
     var schedulerjob = schedule.scheduleJob(`${min} ${hour} * * *`, function () {
       startStandUp(resroleid,reschannelid,client, guild);
-    
+      
     });
     standupScheduleData = new StandupScheduleData();
     standupScheduleData.ChannelId = reschannelid;

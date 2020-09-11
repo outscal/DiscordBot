@@ -1,5 +1,6 @@
 const standup = require("./StandUp/StandUp_bot");
 const Discord = require('discord.js');
+var schedule = require("node-schedule");
 const Firebase = require('./Firebase/firebase.js');
 const Command = require('./Response/BotCammands.js');
 const stringMessage = require('./Strings/ServerStrings');
@@ -25,6 +26,8 @@ const morningTime = "StandupMorningTime";
 const eveningTime = "StandupEveningTime";
 // main Outscal guild object - use this everywhere 
 var myGuild; 
+var copyMins = "30"; // time in ireland time to copy previous day leader board data to today 
+var copyhours = "1";
 
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
@@ -32,7 +35,13 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
+    leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
     standup.getDataAndSchdule(adminDatabase, client, myGuild);
+    schedule.scheduleJob(`${copyMins} ${copyhours} * * *`, function () {
+        //console.log("inside Copy Schedule");
+        leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+        leaderboardmodule.MakeCopyOfLeaderBoard();
+    });
     returnTimeInIST('12:15');
     //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
@@ -334,17 +343,18 @@ function test(){
     // console.log(perms);
 
     leaderboardmodule.InitLeaderBoardDatabase(adminDatabase); //its firebase db reference
+    leaderboardmodule.MakeCopyOfLeaderBoard();
     //leaderboardmodule.MakeCopyOfLeaderBoard();
-    studentData = new LeaderBoardStudentData();
-    studentData.ChannelId = "12";
-    studentData.StudentId = 30;
-    studentData.IsStreak = 0;
-    studentData.Streak = 0;
-    studentData.Score = 0;
-    //studentData.Score = leaderboardmodule.CalculateScore();
-    leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId,returnScore);
-    leaderboardmodule.setupLeaderBoardDB(studentData);
-    leaderboardmodule.CreateLeaderBoardDBServer();
+    // studentData = new LeaderBoardStudentData();
+    // studentData.ChannelId = "12";
+    // studentData.StudentId = 30;
+    // studentData.IsStreak = 0;
+    // studentData.Streak = 0;
+    // studentData.Score = 0;
+    // //studentData.Score = leaderboardmodule.CalculateScore();
+    // leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId,returnScore);
+    // leaderboardmodule.setupLeaderBoardDB(studentData);
+    // leaderboardmodule.CreateLeaderBoardDBServer();
     //leaderboardmodule.GetPreviousDate();
 
 }
