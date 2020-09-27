@@ -13,17 +13,19 @@ const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 //const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 const { returnTimeInIST } = require("./LeaderBoard/LeaderBoard.js");
-
+const { updateKarma } = require("./Leaderboard/Karma.js");
 
 dotenv.config();
 
 const serverID = "536834108077113364"; // remember to change to Outscal server id
 const client = new Discord.Client();
 const adminDatabase = setupFirebase();
+
 var everyoneid = "536834108077113364";
 var botid = "736968069649530923";
 const morningTime = "StandupMorningTime";
 const eveningTime = "StandupEveningTime";
+
 // main Outscal guild object - use this everywhere 
 var myGuild; 
 var copyMins = "30"; // time in ireland time to copy previous day leader board data to today 
@@ -31,25 +33,24 @@ var copyhours = "1";
 
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
-    
     console.log(`Logged in as ${client.user.tag}`);
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
-    leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
-    standup.getDataAndSchdule(adminDatabase, client, myGuild);
-    schedule.scheduleJob(`${copyMins} ${copyhours} * * *`, function () {
-        //console.log("inside Copy Schedule");
-        leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
-        leaderboardmodule.MakeCopyOfLeaderBoard();
-    });
-    returnTimeInIST('12:15');
+    // leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+    // standup.getDataAndSchdule(adminDatabase, client, myGuild);
+    // schedule.scheduleJob(`${copyMins} ${copyhours} * * *`, function () {
+    //     //console.log("inside Copy Schedule");
+    //     leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+    //     leaderboardmodule.MakeCopyOfLeaderBoard();
+    // });
+    // returnTimeInIST('12:15');
     //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 
 client.on('message', async msg => {
+
     if (msg.channel.type == "dm") {
         standup.standUpCommands(msg, client, myGuild, adminDatabase);
-        
     } 
     // commands only team members can run 
     // TODO refactor to have all team commands in one module and community commands in a different module 
@@ -89,10 +90,10 @@ client.on('message', async msg => {
                 var dbchild = StandupConfigDB.child(resroleName); 
                 dbchild.set(standupData);
             }
-            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[0],client,myGuild,morningTime);
-            standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[1],client,myGuild,eveningTime);
-            leaderboardmodule.leaderBoardScheduler(adminDatabase,channelinfo,timesplit[2],client);
-            //standup.getDataAndSchdule(adminDatabase, client, myGuild);
+
+            // standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[0],client,myGuild,morningTime);
+            // standup.StandUpscheduler(roleinfo.id,channelinfo.id,channelinfo,timesplit[1],client,myGuild,eveningTime);
+            // leaderboardmodule.leaderBoardScheduler(adminDatabase,channelinfo,timesplit[2],client);
         }
         else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) 
@@ -297,33 +298,17 @@ client.on('message', async msg => {
     else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
         msg.reply("Your Discord Id is : " + msg.author);
     }
-    // else if (msg.content.startsWith("!createrole") && msg.channel.name === "bot"){
-    //     if(msg.member.roles.cache.some(role => role.name === 'team')) 
-    //     { 
-    //         // command as !createrole rolename ['permissions','permission2']
-    //         var splitMsgContents = msg.content.split(" ");    // splitting command content
-    //         var roleName = splitMsgContents[1];
-    //         var rolePermissions = splitMsgContents[2];
-    //         var defaultPerms = ['MANAGE_MESSAGES', 'KICK_MEMBERS'];
-    //         if(rolePermissions == null)
-    //         {
-    //             rolePermissions = defaultPerms;
-    //         }
-    //         msg.guild.roles.create({data:{name:roleName,permissions:rolePermissions}});
-    //     }      
-    // }
+    else if (msg.content.includes("thank")) {
+        updateKarma(myGuild, adminDatabase, msg);
+        // for (var i = 0; i < msg.mentions.users.size; i++) {
+        //     console.log(msg.mentions.users.array()[i].id);
+        //     if (msg.mentions.users.array()[i].id != msg.author.id) {
+        //         // databaseSystem.UpdateKarmaPoints(msg.mentions.users.array()[i].id);
+        //         SendMessageToChannel("Karma point awarded to:" + msg.mentions.user.array()[i].id,msg.channel.id);
+        //     }
+        // }
     }
-    // else if (msg.content.includes("thank")) {
-    //     //console.log(msg.mentions.users.array()[0]);
-    //     for (var i = 0; i < msg.mentions.users.size; i++) {
-    //         console.log(msg.mentions.users.array()[i].id);
-    //         if (msg.mentions.users.array()[i].id != msg.author.id) {
-    //             databaseSystem.UpdateKarmaPoints(msg.mentions.users.array()[i].id);
-    //             SendMessageToChannel("Karma point awarded to:" + msg.mentions.user.array()[i].id,msg.channel.id);
-    //         }
-    //     }
-    // }
-);
+});
 
 function ListOfChannels(guild) {
   guild.channels.forEach((channel) => {
@@ -339,9 +324,6 @@ function returnScore(score,dbToUpdate){
     dbToUpdate.child("Score").set(score);
 }
 function test(){
-    // var perms = new Discord.Permissions(DEFAULT);
-    // console.log(perms);
-
     leaderboardmodule.InitLeaderBoardDatabase(adminDatabase); //its firebase db reference
     leaderboardmodule.MakeCopyOfLeaderBoard();
     //leaderboardmodule.MakeCopyOfLeaderBoard();
@@ -356,5 +338,4 @@ function test(){
     // leaderboardmodule.setupLeaderBoardDB(studentData);
     // leaderboardmodule.CreateLeaderBoardDBServer();
     //leaderboardmodule.GetPreviousDate();
-
 }
