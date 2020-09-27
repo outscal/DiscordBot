@@ -47,8 +47,19 @@ client.on('ready', () => {
     //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 
-client.on('message', async msg => {
+const WelcomeMessage = `Hello, welcome to Outscal's Community.
+Please check out our website https://www.outscal.com/ for any information about us.
+You can follow us on the social media handles - 
+LinkedIn - https://www.linkedin.com/school/outscal/ 
+Youtube - https://www.youtube.com/channel/UC8ibPNSo77J9CRiii9xiR1Q/ 
+Instagram - http://www.instagram.com/outscalwithus/ 
+Whatsapp - https://wa.me/918595430891`;
 
+client.on('guildMemberAdd', member => {
+    member.send(WelcomeMessage);
+});
+
+client.on('message', async msg => {
     if (msg.channel.type == "dm") {
         standup.standUpCommands(msg, client, myGuild, adminDatabase);
     } 
@@ -138,27 +149,11 @@ client.on('message', async msg => {
 
                 //console.log(channelName,channelReason);
                 myGuild.channels.create(channelName, { reason: channelReason,parent: categoryid,type: "text",permissionOverwrites: [
-                    {
-                        id: msg.guild.id,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: msg.author.id,
-                        allow: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: everyoneid,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: rolemapinfo.id ,
-                        allow: ['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
-
-                    },
-                    {
-                        id: botid,
-                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
-                    }
+                    { id: msg.guild.id, deny: ['VIEW_CHANNEL'], },
+                    { id: msg.author.id, allow: ['VIEW_CHANNEL'], },
+                    { id: everyoneid, deny: ['VIEW_CHANNEL'], },
+                    { id: rolemapinfo.id , allow: ['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'], },
+                    { id: botid, allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'], }
                 ],}).then(console.log("Success"))
                 .catch(console.error);
                 msg.reply("Channel : "+channelName+"created with reason : "+channelReason);
@@ -177,26 +172,11 @@ client.on('message', async msg => {
                 var rolemapid =  myGuild.roles.cache.find(role => role.name === rolemap);
                 //console.log(channelName,channelReason);
                 msg.guild.channels.create(categoryName, { reason: channelReason,type: "category",permissionOverwrites: [
-                    {
-                        id: myGuild.id,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: msg.author.id,
-                        allow: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: everyoneid,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: botid,
-                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
-                    },
-                    {
-                        id: ()=>{if(rolemapid.id != null){return rolemapid.id;}else{return botid}} ,
-                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
-                    }
+                    { id: myGuild.id, deny: ['VIEW_CHANNEL'], },
+                    { id: msg.author.id, allow: ['VIEW_CHANNEL'], },
+                    { id: everyoneid, deny: ['VIEW_CHANNEL'], },
+                    { id: botid, allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'], },
+                    { id: ()=>{if(rolemapid.id != null){return rolemapid.id;}else{return botid}} , allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'], }
                 ],}).then(console.log("Success"))
                 .catch(console.error);
                 msg.reply("Category : "+channelName+"created with reason : "+channelReason);
@@ -210,26 +190,11 @@ client.on('message', async msg => {
                 var roleinfo =  myGuild.roles.cache.find(role => role.name === rolename);
                 var channelinfo = myGuild.channels.cache.find(channel => channel.name === channelName);
                 channelinfo.overwritePermissions([
-                    {
-                        id: roleinfo.id,
-                        allow: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: myGuild.id,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: msg.author.id,
-                        allow: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: everyoneid,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: botid,
-                        allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'],
-                    },
+                    { id: roleinfo.id, allow: ['VIEW_CHANNEL'], },
+                    { id: myGuild.id, deny: ['VIEW_CHANNEL'], },
+                    { id: msg.author.id, allow: ['VIEW_CHANNEL'], },
+                    { id: everyoneid, deny: ['VIEW_CHANNEL'], },
+                    { id: botid, allow:['MANAGE_CHANNELS','MANAGE_ROLES','VIEW_CHANNEL','SEND_MESSAGES'], },
                 ]).catch(console.err);
                 msg.reply("Channel : "+channelName+" Role : "+rolename+" are Binded");
                 //console.log(channelinfo.id+"g"+myGuild.id+"id"+roleinfo.id);//741252591932932117 + 741245483904663583
@@ -300,13 +265,6 @@ client.on('message', async msg => {
     }
     else if (msg.content.includes("thank")) {
         updateKarma(myGuild, adminDatabase, msg);
-        // for (var i = 0; i < msg.mentions.users.size; i++) {
-        //     console.log(msg.mentions.users.array()[i].id);
-        //     if (msg.mentions.users.array()[i].id != msg.author.id) {
-        //         // databaseSystem.UpdateKarmaPoints(msg.mentions.users.array()[i].id);
-        //         SendMessageToChannel("Karma point awarded to:" + msg.mentions.user.array()[i].id,msg.channel.id);
-        //     }
-        // }
     }
 });
 
@@ -326,16 +284,4 @@ function returnScore(score,dbToUpdate){
 function test(){
     leaderboardmodule.InitLeaderBoardDatabase(adminDatabase); //its firebase db reference
     leaderboardmodule.MakeCopyOfLeaderBoard();
-    //leaderboardmodule.MakeCopyOfLeaderBoard();
-    // studentData = new LeaderBoardStudentData();
-    // studentData.ChannelId = "12";
-    // studentData.StudentId = 30;
-    // studentData.IsStreak = 0;
-    // studentData.Streak = 0;
-    // studentData.Score = 0;
-    // //studentData.Score = leaderboardmodule.CalculateScore();
-    // leaderboardmodule.CalculateScore(studentData.ChannelId,studentData.StudentId,returnScore);
-    // leaderboardmodule.setupLeaderBoardDB(studentData);
-    // leaderboardmodule.CreateLeaderBoardDBServer();
-    //leaderboardmodule.GetPreviousDate();
 }
