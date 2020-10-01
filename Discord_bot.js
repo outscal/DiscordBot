@@ -13,7 +13,7 @@ const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 //const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 const { returnTimeInIST } = require("./LeaderBoard/LeaderBoard.js");
-const { updateKarma } = require("./Leaderboard/Karma.js");
+const { updateKarma } = require("./LeaderBoard/Karma.js");
 
 dotenv.config();
 
