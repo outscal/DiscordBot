@@ -47,7 +47,7 @@ client.on('ready', () => {
     //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 
-const WelcomeMessage = `Hello, welcome to Outscal's Community.
+const WelcomeMessage = `Hello, welcome to Outscal's Developers Community.
 Please check out our website https://www.outscal.com/ for any information about us.
 You can follow us on the social media handles - 
 LinkedIn - https://www.linkedin.com/school/outscal/ 
