@@ -53,7 +53,10 @@ You can follow us on the social media handles -
 LinkedIn - https://www.linkedin.com/school/outscal/ 
 Youtube - https://www.youtube.com/channel/UC8ibPNSo77J9CRiii9xiR1Q/ 
 Instagram - http://www.instagram.com/outscalwithus/ 
-Whatsapp - https://wa.me/918595430891`;
+Whatsapp - https://wa.me/918595430891
+
+About Us
+Outscal is an EdTech platform created with a vision to enable next generation Industry Leaders. Gaming Industry is one of the growing industries in the world right now and Outscal focusses on bridging the gap between its stakeholders and education providers. We connect the students of institutes and universities enrolled in a relevant course with companies that are hiring fresh talents across the world. Not only do we support young graduates in becoming budding professionals, but we at Outscal strive to help them secure the best opportunities for their career in the gaming industry. Our sole aim is the success of the students. We work hard to make sure we achieve our aim. At Outscal, we hire industry experts as mentors and have a bustling network of student communities where we solve problems and keep getting better at what we do.`;
 
 client.on('guildMemberAdd', member => {
     member.send(WelcomeMessage);
