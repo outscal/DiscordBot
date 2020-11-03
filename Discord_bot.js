@@ -47,16 +47,15 @@ client.on('ready', () => {
     //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 
-const WelcomeMessage = `Hello, welcome to Outscal's Developers Community.
-Please check out our website https://www.outscal.com/ for any information about us.
-You can follow us on the social media handles - 
-LinkedIn - https://www.linkedin.com/school/outscal/ 
-Youtube - https://www.youtube.com/channel/UC8ibPNSo77J9CRiii9xiR1Q/ 
-Instagram - http://www.instagram.com/outscalwithus/ 
-Whatsapp - https://wa.me/918595430891
+const WelcomeMessage = `Hi there - 
+Welcome to Outscal’s community. Thanks for joining <3 
+Goal of the community is to bring game industry professionals and aspirants in one place globally to share learning, participate in game jams, have fun building games :) 
 
-About Us
-Outscal is an EdTech platform created with a vision to enable next generation Industry Leaders. Gaming Industry is one of the growing industries in the world right now and Outscal focusses on bridging the gap between its stakeholders and education providers. We connect the students of institutes and universities enrolled in a relevant course with companies that are hiring fresh talents across the world. Not only do we support young graduates in becoming budding professionals, but we at Outscal strive to help them secure the best opportunities for their career in the gaming industry. Our sole aim is the success of the students. We work hard to make sure we achieve our aim. At Outscal, we hire industry experts as mentors and have a bustling network of student communities where we solve problems and keep getting better at what we do.`;
+We have a free C++ course for game developers (no prior coding needed) that you can access by signing up here - https://linktr.ee/Outscal
+
+Feel free to invite your friends to be part of the community using the link above. 
+Cheers! 
+`;
 
 client.on('guildMemberAdd', member => {
     member.send(WelcomeMessage);
