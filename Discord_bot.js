@@ -13,7 +13,7 @@ const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 //const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 const { returnTimeInIST } = require("./LeaderBoard/LeaderBoard.js");
-const { updateKarma } = require("./LeaderBoard/Karma.js");
+const { updateKarma, getKarma } = require("./LeaderBoard/Karma.js");
 
 dotenv.config();
 
@@ -223,6 +223,16 @@ client.on('message', async msg => {
                 }
             }
         }
+        
+        // Karma command
+        else if(msg.content.startsWith("!karma") && msg.channel.name === "bot"){
+            var mention = msg.author.id;
+            var karmaPoints = getKarma(mention);
+            
+            var tag = `<@!${mention}>`;
+            
+	        msg.channel.send(`${tag} you have ${karmaPoints} Karma points.`);
+        }
     }
     else if (msg.content == 'ping' && msg.channel.name === "bot") {
         SendMessageToChannel("pong",msg.channel.id);
@@ -265,7 +275,7 @@ client.on('message', async msg => {
     else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
         msg.reply("Your Discord Id is : " + msg.author);
     }
-    else if (msg.content.includes("thank")) {
+    else if (msg.content.includes("thank") || msg.content.includes("Thank")) {
         updateKarma(myGuild, adminDatabase, msg);
     }
 });
