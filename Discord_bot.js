@@ -13,7 +13,7 @@ const LeaderBoardStudentData = require('./LeaderBoard/LeaderBoardStudentData');
 //const { FLAGS } = require("discord.js/src/util/BitField");
 const { giveRoleDMmessage } = require("./Strings/ServerStrings");
 const { returnTimeInIST } = require("./LeaderBoard/LeaderBoard.js");
-const { updateKarma } = require("./LeaderBoard/Karma.js");
+const { updateKarma, getKarma } = require("./LeaderBoard/Karma.js");
 
 dotenv.config();
 
@@ -223,6 +223,16 @@ client.on('message', async msg => {
                 }
             }
         }
+        
+        // Karma command
+        else if(msg.content.startsWith("!karma") && msg.channel.name === "bot"){
+            var mention = msg.author.id;
+            var karmaPoints = getKarma(mention);
+            
+            var tag = `<@!${mention}>`;
+            
+	        msg.channel.send(`${tag} you have ${karmaPoints} Karma points.`);
+        }
     }
     else if (msg.content == 'ping' && msg.channel.name === "bot") {
         SendMessageToChannel("pong",msg.channel.id);
@@ -265,8 +275,21 @@ client.on('message', async msg => {
     else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
         msg.reply("Your Discord Id is : " + msg.author);
     }
-    else if (msg.content.includes("thank")) {
-        updateKarma(myGuild, adminDatabase, msg);
+    else if (msg.content.includes("thank") || msg.content.includes("Thank")) {
+        var usersSize = msg.mentions.users.size;
+        var author = msg.author;
+        
+        if(author.username != "OutscalBot"){
+        // if((usersSize > 0) && (author.username != "OutscalBot")){
+            
+            updateKarma(myGuild, adminDatabase, msg);
+        
+        }/* else if(author.username == "OutscalBot") {
+            
+            var tag = `<@!${author.id}>`;
+            msg.channel.send(`${tag}\nHey - looks like you are thanking someone who might have helped you! If you would like them to get a karma point please use "thanks @username" format.`);
+        
+        }*/
     }
 });
 
