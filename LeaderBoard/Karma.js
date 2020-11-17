@@ -1,16 +1,22 @@
 const users = [];
 
 var updateKarma = function(guild, database, msg) {
-	var user = msg.mentions.users.first();
+	console.log(msg);
 
 	if(msg.mentions.users.size > 1){
 		var mention = msg.mentions.users.first(2)[1].id;
+		updateKarmaPoints(msg, mention);
 	}
-	else{
+	else if(msg.mentions.users.size == 1){
 		var mention = msg.mentions.users.first().id;
+		updateKarmaPoints(msg, mention);	
+	} else {
+            
+		var tag = `<@!${msg.author.id}>`;
+		msg.channel.send(`${tag}\nHey - looks like you are thanking someone who might have helped you! If you would like them to get a karma point please use "thanks @username" format.`);
+	
 	}
 
-	updateKarmaPoints(msg, mention);
 }
 
 function updateKarmaPoints(msg, mention){
@@ -36,8 +42,7 @@ function updateKarmaPoints(msg, mention){
 	}
 	
 	var tag = `<@!${mention}>`;	
-	msg.channel.send(`${tag} you get +1 Karma points.`);
-	
+	msg.channel.send(`${tag} you get +1 Karma points.`);	
 }
 
 var getKarma = function(mention){

@@ -276,7 +276,20 @@ client.on('message', async msg => {
         msg.reply("Your Discord Id is : " + msg.author);
     }
     else if (msg.content.includes("thank") || msg.content.includes("Thank")) {
-        updateKarma(myGuild, adminDatabase, msg);
+        var usersSize = msg.mentions.users.size;
+        var author = msg.author;
+        
+        if(author.username != "OutscalBot"){
+        // if((usersSize > 0) && (author.username != "OutscalBot")){
+            
+            updateKarma(myGuild, adminDatabase, msg);
+        
+        }/* else if(author.username == "OutscalBot") {
+            
+            var tag = `<@!${author.id}>`;
+            msg.channel.send(`${tag}\nHey - looks like you are thanking someone who might have helped you! If you would like them to get a karma point please use "thanks @username" format.`);
+        
+        }*/
     }
 });
 
