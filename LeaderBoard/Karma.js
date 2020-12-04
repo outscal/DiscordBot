@@ -4,9 +4,8 @@ var updateKarma = function(guild, database, msg) {
 
 	console.log(msg.mentions.users.first());
 
-	if(msg.mentions.users.size > 1){
+	if(msg.mentions.users.size >= 1){
 		msg.mentions.users.forEach(user => {
-			console.log(user.id);
 			updateKarmaPoints(msg, user.id);
 		});
 	} else {
