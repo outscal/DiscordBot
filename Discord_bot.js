@@ -291,11 +291,11 @@ client.on('message', async msg => {
             var tag = `<@!${mention}>`;
             
 	        msg.channel.send(`${tag} you have ${karmaPoints} Karma points.`);
-        }*/
+        }
         else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
             console.log("running");
             msg.reply("Your Discord Id is : " + msg.author.id + ", in first if statement");
-        }
+        }*/
     }
     else if (msg.content == 'ping' && msg.channel.name === "bot") {
         SendMessageToChannel("pong",msg.channel.id);
@@ -335,10 +335,9 @@ client.on('message', async msg => {
             msg.channel.send("Something is wrong, please check the command");
         }
     }
-    /*else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
-        console.log("running");
+    else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
         msg.reply("Your Discord Id is : " + msg.author.id);
-    }*/
+    }
     else if(msg.content.startsWith("!karma") && msg.channel.name === "bot"){
         console.log(msg.author);
         var mention = msg.author.id;

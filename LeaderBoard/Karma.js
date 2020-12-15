@@ -2,7 +2,7 @@ const users = [];
 
 var updateKarma = function(guild, database, msg) {
 
-	console.log(msg.mentions.users.first());
+	console.log(msg.mentions);
 
 	if(msg.mentions.users.size >= 1){
 		msg.mentions.users.forEach(user => {
