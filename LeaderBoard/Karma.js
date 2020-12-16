@@ -2,10 +2,10 @@ const users = [];
 
 var updateKarma = function(guild, database, msg) {
 
-	console.log(msg.mentions);
+	console.log(msg);
 
 	if(msg.mentions.users.size >= 1){
-		msg.mentions.users.forEach(user => {
+		msg.mentions.users.forEach(user => {			
 			updateKarmaPoints(msg, user.id);
 		});
 	} else {
@@ -17,52 +17,53 @@ var updateKarma = function(guild, database, msg) {
 }
 
 function updateKarmaPoints(msg, mention){
-	
-	// Check if users exists in users object.
-	var userIndex = users.findIndex((users) => users.id === mention);
-	
-	// Check if the users exists in the database.
-	if(userIndex >= 0){
-		// update its karma points
-		users[userIndex].karma_points++;
-	} 
-	// Otherwise ....
-	else {
-		// ....create a new user
-		var newUser = {
-			"id": mention,
-			"karma_points" : 1
-		};
+
+	if(msg.author.id === mention){
+
+		printKarmaMessage(msg, createTag(mention), true);
+
+	} else {
+
+		// Fetch users index from users object.
+		var userIndex = users.findIndex((users) => users.id === mention);
 		
-		// and append to users object.
-		users.push(newUser);
+		
+		if(userIndex >= 0){							// If the user exists in the database then.....
+			users[userIndex].karma_points++;		// .....update its karma points
+		} else {									// Otherwise ...
+			var newUser = {							// ....create a new user
+				"id": mention,
+				"karma_points" : 1
+			};
+			users.push(newUser);					// and append to users object.
+		}
+			
+		printKarmaMessage(msg, createTag(mention), false);
+
 	}
 	
-	var tag = `<@!${mention}>`;	
-	msg.channel.send(`${tag} you get +1 Karma points.`);	
 }
+
+function createTag(mention){ return `<@!${mention}>`; }
+
+function printKarmaMessage(msg, tag, isAssigningThemselves){
+	if(isAssigningThemselves){
+	
+		msg.channel.send(`${tag} don't be a smart a**. You get 0 points. <:sunglasses:788659919867215903>`);
+	
+	} else {
+		
+		msg.channel.send(`${tag} you get +1 Karma points.`);
+	
+	}
+
+}
+
 
 var getKarma = function(mention){
 	var user = users.find((users) => users.id === mention);
 
 	return (user == null) ? "0" : user.karma_points;
-}
-
-function getUserFromMention(mention) {
-	// The id is the first and only match found by the RegEx.
-	const matches = mention.match(/^<@!?(\d+)>$/);
-	
-	// If supplied variable was not a mention, matches will be null instead of an array.
-	if (!matches) return;
-
-	// However the first element in the matches array will be the entire mention, not just the ID,
-	// so use index 1.
-	const id = matches[1];
-
-	console.log(client.users.cache);
-
-	return client.users.cache.get(mention);
-	// return client.users.cache.get(id);
 }
 
 module.exports = {
