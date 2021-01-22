@@ -203,7 +203,7 @@ client.on('message', async msg => {
                 //console.log(channelinfo.id+"g"+myGuild.id+"id"+roleinfo.id);//741252591932932117 + 741245483904663583
             }
         }
-        else if (msg.content.startsWith("!giverole") && msg.channel.name === "bot"){
+        /*else if (msg.content.startsWith("!giverole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) { 
                 
                 // command as !giverole discordId,discordId roleId
@@ -216,7 +216,7 @@ client.on('message', async msg => {
                 // console.log(msg.guild.members);
                 // console.log(splitMsgContents);
                 // console.log("Role to assign: " + roleToAssign);
-                // console.log(msg);
+                console.log(msg);
                 // console.log(msg.guild);
 
                 for(var i = 0; i < studentIdList.length; i++){
@@ -231,7 +231,7 @@ client.on('message', async msg => {
                     .catch(err => msg.reply("student with id: "+ studentIdList[i] +" not found - "+ err));
                 }
             }
-        } 
+        }*/
         
         else if (msg.content.startsWith("!runrole") && msg.channel.name === "bot"){
             if(msg.member.roles.cache.some(role => role.name === 'team')) { 
@@ -288,6 +288,35 @@ client.on('message', async msg => {
             console.log("running");
             msg.reply("Your Discord Id is : " + msg.author.id + ", in first if statement");
         }
+    }
+    else if (msg.content.startsWith("!giverole") && msg.channel.name === "bot"){
+        // if(msg.member.roles.cache.some(role => role.name === 'team')) { 
+            
+            // command as !giverole discordId,discordId roleId
+            var splitMsgContents = msg.content.split(" ");    // splitting command contents 
+            var allStudentId = splitMsgContents[1];           // All discord ID's
+            var batchID = splitMsgContents[2];                // roleId to assign
+            var studentIdList = allStudentId.split(",");
+            const roleToAssign = msg.guild.roles.cache.find(role=>role.id == batchID);
+            
+            // console.log(msg.guild.members);
+            // console.log(splitMsgContents);
+            // console.log("Role to assign: " + roleToAssign);
+            console.log(msg);
+            // console.log(msg.guild);
+
+            for(var i = 0; i < studentIdList.length; i++){
+                // find from discord id which member of discord 
+                var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]);
+                msg.guild.members.fetch(studentIdList[i])
+                .then(studentmember => {  
+                        studentmember.roles.add(roleToAssign);
+                        console.log(studentmember);
+                        msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
+                })
+                .catch(err => msg.reply("student with id: "+ studentIdList[i] +" not found - "+ err));
+            }
+        // }
     }
     else if (msg.content == 'ping' && msg.channel.name === "bot") {
         SendMessageToChannel("pong",msg.channel.id);
