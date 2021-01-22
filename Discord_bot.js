@@ -213,22 +213,23 @@ client.on('message', async msg => {
                 var studentIdList = allStudentId.split(",");
                 const roleToAssign = msg.guild.roles.cache.find(role=>role.id == batchID);
                 
-                console.log(msg.guild.members);
+                // console.log(msg.guild.members);
                 // console.log(splitMsgContents);
                 // console.log("Role to assign: " + roleToAssign);
                 // console.log(msg);
                 // console.log(msg.guild);
-                // for(var i = 0; i < studentIdList.length; i++){
-                    //find from discord id which member of discord 
-                    // var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]);
-                    // msg.guild.members.fetch(studentIdList[i])
-                    // .then(studentmember => {  
-                            // studentmember.roles.add(roleToAssign);
-                            // console.log(studentmember);
-                            // msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
-                    // })
-                    // .catch(err => msg.reply("student with id: "+ studentIdList[i] +" not found - "+ err));
-                // }
+
+                for(var i = 0; i < studentIdList.length; i++){
+                    // find from discord id which member of discord 
+                    var studentmember = msg.guild.members.cache.find(member=>member.id == studentIdList[i]);
+                    msg.guild.members.fetch(studentIdList[i])
+                    .then(studentmember => {  
+                            studentmember.roles.add(roleToAssign);
+                            console.log(studentmember);
+                            msg.reply("student : "+studentmember.displayName+" is assigned to role " + roleToAssign.name); 
+                    })
+                    .catch(err => msg.reply("student with id: "+ studentIdList[i] +" not found - "+ err));
+                }
             }
         } 
         
@@ -281,21 +282,12 @@ client.on('message', async msg => {
                 // }
             }
         
-        }                
-        // Karma command
-        /*else if(msg.content.startsWith("karma") && msg.channel.name === "bot"){
-            console.log(msg.author);
-            var mention = msg.author.id;
-            var karmaPoints = getKarma(mention);
-            
-            var tag = `<@!${mention}>`;
-            
-	        msg.channel.send(`${tag} you have ${karmaPoints} Karma points.`);
         }
+
         else if (msg.content.startsWith("!showid") && msg.channel.name === "bot") {
             console.log("running");
             msg.reply("Your Discord Id is : " + msg.author.id + ", in first if statement");
-        }*/
+        }
     }
     else if (msg.content == 'ping' && msg.channel.name === "bot") {
         SendMessageToChannel("pong",msg.channel.id);
