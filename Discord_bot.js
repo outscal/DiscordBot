@@ -16,22 +16,8 @@ const { returnTimeInIST } = require("./LeaderBoard/LeaderBoard.js");
 const { updateKarma, getKarma } = require("./LeaderBoard/Karma.js");
 const PREFIX = "!";
 const { MessageCollector } = require("discord.js-collector"); // Discord message collector
-const creds = require('./keys.json'); // Credentials for google spreedsheet file
-const { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } = require('google-spreadsheet'); // google spreedsheet npm included
-
-//All global variables which we will need in our code below
-var SpreedSheetId;
-var status = 0;
-var roleId=0;
-var sheetarr = [];
-var str;
-var CMD;
-var email;
-var sheetIndex = 0;
-var verified=0;
-var clanName;
-var timeout=0;
-var memberID;
+const creds = require('./Admissions/keys.json'); // Credentials for google spreedsheet file
+const { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } = require('google-spreadsheet');
 dotenv.config();
 
 const serverID = "536834108077113364"; // remember to change to Outscal server id
@@ -47,21 +33,34 @@ const eveningTime = "StandupEveningTime";
 var myGuild; 
 var copyMins = "30"; // time in ireland time to copy previous day leader board data to today 
 var copyhours = "1";
-
+//global variables
+var SpreedSheetId;
+var status = 0;
+var roleId=0;
+var sheetarr = [];
+var str;
+var CMD;
+var email;
+var sheetIndex = 0;
+var verified=0;
+var clanName;
+var timeout=0;
+var memberID;
+//global variables
 client.login(process.env.DISCORD_APP_TOKEN); 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     myGuild = client.guilds.resolve(serverID);
     console.log("Myguild id: " + myGuild.id);
-    // leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
-    // standup.getDataAndSchdule(adminDatabase, client, myGuild);
-    // schedule.scheduleJob(`${copyMins} ${copyhours} * * *`, function () {
-    //     //console.log("inside Copy Schedule");
-    //     leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
-    //     leaderboardmodule.MakeCopyOfLeaderBoard();
-    // });
-    // returnTimeInIST('12:15');
-    //leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
+   leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+   standup.getDataAndSchdule(adminDatabase, client, myGuild);
+    schedule.scheduleJob(`${copyMins} ${copyhours} * * *`, function () {
+        console.log("inside Copy Schedule");
+       leaderboardmodule.InitLeaderBoardDatabase(adminDatabase);
+       leaderboardmodule.MakeCopyOfLeaderBoard();
+   });
+   returnTimeInIST('12:15');
+    leaderboardmodule.leaderboardResultMessage(adminDatabase,null,client);
 });
 
 const WelcomeMessage = `Hi there - 
@@ -394,168 +393,156 @@ client.on('message', async msg => {
             updateKarma(myGuild, adminDatabase, msg);
         
         }
-    }else if(msg.content.startsWith("!join-") && msg.channel.name === "bot"){
+    }else if(msg.content.startsWith('!join-') && msg.channel.name === "bot"){
         const [CC, ...args] = msg.content.trim().substring(PREFIX.length).split("join-");
 
         //assign authorID to memberID
         memberID = msg.author.id;
-
-        
         const doc = new GoogleSpreadsheet('1RwyTEQCDG1gjGxkUJYh8JjkGW9cE5uZxdTuyEt1Vmn8');
         accessSheet(creds,doc,args).then(()=>{
             //after finishing accessSheet Call the CheckStatus function 
           
-            checkStatus();
+           
             //This is a verification function
           });
-        }
-
-
-
-
-
-        // Async Check function 
-        async function checkStatus(){
-            let member = msg.member;
-             //let member = message.guild.members.get(memberID);
-             if(member.roles.cache.has(sheetarr[2])){
-                msg.reply("You are already in " + clanName);
-                return 0;
-              }else{
-                  if(str=="YES"){
-                  
-                    const filter = (m) => m.author.id ===  msg.author.id;
-                   
-                    msg.reply("Please check your DM to verify your email id");
-                    const botMessage = await  msg.author.send("Enter your registered email Id please?");
-                        const userMessage = await MessageCollector.asyncQuestion({
-                          botMessage,
-                         user:  msg.author.id,
-                         collectorOptions:{
-                           time:300000
-                         }
-                    }).catch(()=>{
-                        msg.author.send("Time out");
-                      console.log("Time out1");
-                      timeout = 1;
-                    });
-   
-                    if(timeout==1){
-                        msg.author.send("Request denied because you did not responded in time");
-                     console.log("Request denied because you did not responded in time");
-                      timeout=0;
-                     return 0;
-                   }else{
-                     timeout = 0;
-                      email = userMessage.content;
-                      console.log(email);
-                       email = email.trim(email);
-                        email = email.toLowerCase();
-                        userID = message.author.id;
-                        const doc2 = new GoogleSpreadsheet(sheetarr[0]);
-                        await doc2.useServiceAccountAuth(creds);
-                        await doc2.loadInfo();
-                        const sheetselector = doc2.sheetsByTitle;
-                        let tab = sheetarr[3];
-                        tab = tab.trim();
-                        tab = tab.toLowerCase();
-                        console.log(tab);
-                        // for(let i=0;i<7;i++){
-                        //  if(sheetselector.title === tab){
-                        //      sheetIndex = sheetselector.index;
-                            
-                        //      break;
-                        //  
-                        // }
-                     
-                        sheet3 = doc2.sheetsByTitle[tab];
-                       
-                        var rows2 = await sheet3.getRows({});
-                        var size = rows2.length;
-                        message.author.send("Give me a minute to verify if the email address exist in our Database");
-                        for(var i=0;i<size;i++){
-                          let Email = rows2[i]._rawData[0];
-                          let cli = rows2[i]._rawData[1]; //Customer Client ID
-                          Email = Email.trim();
-                          Email = Email.toLowerCase(); // ending case sensitivity issues in the code!
-                        
-                          if(Email==email && rows2[i]._rawData[1]==''){
-                            
-                         console.log(Email);
-                         rows2[i].candidateID = userID;
-                         rows2[i].RoleID =  sheetarr[2];
-                        
-                         await rows2[i].save();
-                        let role = msg.guild.roles.cache.find(r => r.id == sheetarr[2]);
-                         console.log(role.name);
-                        let member = msg.member;
-   
-                        member.roles.add(role).catch(console.error);
-                        const channel = client.channels.cache.find(channel => channel.name === "system-update-log");
-                        let User = client.users.cache.get(userID);
-                        channel.send("User has joined a clan! Here are the details");
-                        channel.send("User Email:" + email);
-                        channel.send(`User Id: ${msg.author} `); 
-                        channel.send(`User Id: ${msg.author.id} `); 
-                        channel.send("User Clan :" + role.name);
-                        
+    }
+    async function accessSheet(creds,doc,args){
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo();
     
+        const sheet = doc.sheetsByIndex[0];
     
-                       verified = 1;
-                        break;
-                       }else if(Email==email && rows2[i]._rawData[1]!=''){
-                         verified = 2;
-                         break;
-                       }
-                        
-                    }
-                    if(verified==1){
-                     msg.author.send("Welcome to the batch!Looking forward to you building something cool!");
-                     
-                     }else if(verified == 2){
-                      msg.author.send("This email Id is already authorized to access the " + clanName + ". You can try with anouther emailID registered with us or Contact Outscal team for support");
-                     
-                    }else{
-                     msg.author.send("Sorry you are not authorized! Contact outscal team to get access");
-                    }
-                    verified=0;
-                    return 0;
-                   }
-                 }else{
-                   msg.reply("Sorry the admission in this batch has closed! If you wish to apply for admission in next batch please contact Outscal Team");
-                   return 0;
-                 }
-               
+        const row1 = await sheet.getRows({}); // To bring a set of rows from first selected spreadsheet!
+    
+        console.log(row1.length);
+        var argument = args;
+        for(let i=0;i<row1.length;i++){
+            if(argument == row1[i].Clan){
+                clanName = row1[i].Clan;
+                sheetarr[0] = row1[i].SheetId;
+                sheetarr[1] = row1[i].Enabled;
+                sheetarr[2]= row1[i].RoleId;  
+                sheetarr[3] = row1[i].Tab;
+                
+                str = sheetarr[1];
+                str = str.trim();
+                str = str.toUpperCase();
+                console.log("This is where the data is being accessed in sheet1");
+                console.log(sheetarr[0]);
+                console.log(sheetarr[1]);
+                console.log(sheetarr[2]);
+                console.log(sheetarr[3]);
+                console.log("This is where the data is  closed accessed in sheet1");
+                break;
             }
         }
-});
-async function accessSheet(creds,doc,args){
-    await doc.useServiceAccountAuth(creds);
-    await doc.loadInfo();
-
-    const sheet = doc.sheetsByIndex[0];
-
-    const row1 = await sheet.getRows({}); // To bring a set of rows from first selected spreadsheet!
-
-    console.log(row1.length);
-    var argument = args;
-    for(let i=0;i<row1.length;i++){
-        if(argument == row1[i].Clan){
-            clanName = row1[i].Clan;
-            sheetarr[0] = row1[i].SheetId;
-            sheetarr[1] = row1[i].Enabled;
-            sheetarr[2]= row1[i].RoleId;  
-            sheetarr[3] = row1[i].Tab;
-            str = sheetarr[1];
-            str = str.trim();
-            str = str.toUpperCase();
-            console.log(sheetarr[0]);
+        let member = msg.member;
+         if(member.roles.cache.has(sheetarr[2])){
+            msg.reply("You are already in " + clanName);
             return 0;
-        }
-    }
-    return 0;
+          }else{
+              if(str=="YES"){
+              
+                const filter = (m) => m.author.id ===  msg.author.id;
+               
+                msg.reply("Please check your DM to verify your email id");
+                const botMessage = await  msg.author.send("Enter your registered email Id please?");
+                    const userMessage = await MessageCollector.asyncQuestion({
+                      botMessage,
+                     user:  msg.author.id,
+                     collectorOptions:{
+                       time:300000
+                     }
+                }).catch(()=>{
+                    msg.author.send("Time out");
+                  console.log("Time out1");
+                  timeout = 1;
+                });
 
-}
+                if(timeout==1){
+                    msg.author.send("Request denied because you did not responded in time");
+                 console.log("Request denied because you did not responded in time");
+                  timeout=0;
+                 return 0;
+               }else{
+                 timeout = 0;
+                  email = userMessage.content;
+                  console.log(email);
+                   email = email.trim(email);
+                    email = email.toLowerCase();
+                    userID = msg.author.id;
+                    const doc2 = new GoogleSpreadsheet(sheetarr[0]);
+                    await doc2.useServiceAccountAuth(creds);
+                    await doc2.loadInfo();
+                 
+                    var tab = sheetarr[3];
+                    tab = tab.trim();
+                    console.log(doc2);
+                    console.log(tab);
+                    //sheetsByTitle
+                    const sheet3 = doc2.sheetsByIndex[0];
+                    var rows2 = await sheet3.getRows({
+
+                    });
+                    console.log(rows2);
+                    var size = rows2.length;
+                    msg.author.send("Give me a minute to verify if the email address exist in our Database");
+                    for(var i=0;i<size;i++){
+                      let Email = rows2[i]._rawData[0];
+                      let cli = rows2[i]._rawData[1]; //Customer Client ID
+                      Email = Email.trim();
+                      Email = Email.toLowerCase(); // ending case sensitivity issues in the code!
+                        console.log(Email);
+                        console.log("This is ClientID which is emppty" + cli);
+                      if(Email==email && rows2[i]._rawData[1]==undefined){
+                        
+                     console.log(Email);
+                     rows2[i].candidateID = userID;
+                     rows2[i].RoleID =  sheetarr[2];
+                    
+                     await rows2[i].save();
+                    let role = msg.guild.roles.cache.find(r => r.id == sheetarr[2]);
+                     console.log(role.name);
+                    let member = msg.member;
+
+                    member.roles.add(role).catch(console.error);
+                    const channel = client.channels.cache.find(channel => channel.name === "system-updates");
+                    let User = client.users.cache.get(userID);
+                    channel.send("User has joined a clan! Here are the details" +"User Email:" + email + `User Id: ${msg.author} ` + `User Id: ${msg.author.id} ` + "User Clan :" + role.name);
+                    
+                   verified = 1;
+                    break;
+                   }else if(Email==email && rows2[i]._rawData[1]!=''){
+                     verified = 2;
+                     break;
+                   }
+                    
+                }
+                if(verified==1){
+                 msg.author.send("Welcome to the batch!Looking forward to you building something cool!");
+                 
+                 }else if(verified == 2){
+                  msg.author.send("This email Id is already authorized to access the " + clanName + ". You can try with anouther emailID registered with us or Contact Outscal team for support");
+                 
+                }else{
+                 msg.author.send("Sorry you are not authorized! Contact outscal team to get access");
+                }
+                verified=0;
+                return 0;
+               }
+             }else{
+               msg.reply("Sorry the admission in this batch has closed! If you wish to apply for admission in next batch please contact Outscal Team");
+               return 0;
+             }
+           
+        }
+      
+      
+        return 0;
+    
+    }
+});
+
 function ListOfChannels(guild) {
   guild.channels.forEach((channel) => {
     console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`);
